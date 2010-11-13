@@ -44,7 +44,7 @@ extends ErebotModuleBase
     {
         if (!is_string($nick)) {
             $translator = $this->getTranslator(NULL);
-            throw new EErebotInvalidValue($translator->gettext(
+            throw new Erebot_InvalidValueException($translator->gettext(
                 'Not a valid nick'));
         }
 
@@ -58,7 +58,7 @@ extends ErebotModuleBase
     {
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
-            throw new EErebotNotFound($translator->gettext('No such token'));
+            throw new Erebot_NotFoundException($translator->gettext('No such token'));
         }
         unset($this->_nicks[$token]);
     }
@@ -67,7 +67,7 @@ extends ErebotModuleBase
     {
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
-            throw new EErebotNotFound($translator->gettext('No such token'));
+            throw new Erebot_NotFoundException($translator->gettext('No such token'));
         }
         return $this->_nicks[$token];
     }
