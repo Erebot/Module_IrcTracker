@@ -16,8 +16,8 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class   ErebotModule_NickTracker
-extends ErebotModuleBase
+class   Erebot_Module_NickTracker
+extends Erebot_Module_Base
 {
     protected $_nicks;
 
