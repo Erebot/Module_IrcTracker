@@ -30,12 +30,14 @@ extends Erebot_Module_Base
         if ($flags & self::RELOAD_HANDLERS) {
             $handler = new Erebot_EventHandler(
                 array($this, 'handleNick'),
-                'Erebot_Event_Nick');
+                'Erebot_Event_Nick'
+            );
             $this->_connection->addEventHandler($handler);
 
             $handler = new Erebot_EventHandler(
                 array($this, 'handlePartOrQuit'),
-                'Erebot_Event_Quit');
+                'Erebot_Event_Quit'
+            );
             $this->_connection->addEventHandler($handler);
         }
     }
@@ -44,8 +46,9 @@ extends Erebot_Module_Base
     {
         if (!is_string($nick)) {
             $translator = $this->getTranslator(NULL);
-            throw new Erebot_InvalidValueException($translator->gettext(
-                'Not a valid nick'));
+            throw new Erebot_InvalidValueException(
+                $translator->gettext('Not a valid nick')
+            );
         }
 
         $this->_nicks[] = $nick;
@@ -58,7 +61,9 @@ extends Erebot_Module_Base
     {
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
-            throw new Erebot_NotFoundException($translator->gettext('No such token'));
+            throw new Erebot_NotFoundException(
+                $translator->gettext('No such token')
+            );
         }
         unset($this->_nicks[$token]);
     }
@@ -67,7 +72,9 @@ extends Erebot_Module_Base
     {
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
-            throw new Erebot_NotFoundException($translator->gettext('No such token'));
+            throw new Erebot_NotFoundException(
+                $translator->gettext('No such token')
+            );
         }
         return $this->_nicks[$token];
     }
@@ -78,8 +85,8 @@ extends Erebot_Module_Base
         $newNick        = (string) $event->getTarget();
 
         $capabilities   =   $this->_connection->getModule(
-                                'Erebot_Module_ServerCapabilities',
-                                Erebot_Connection::MODULE_BY_NAME);
+            'Erebot_Module_ServerCapabilities'
+        );
 
         foreach ($this->_nicks as $token => &$nick) {
             if (!$capabilities->irccasecmp($nick, $oldNick))
@@ -93,8 +100,8 @@ extends Erebot_Module_Base
         $srcNick        = (string) $event->getSource();
 
         $capabilities   =   $this->_connection->getModule(
-                                'Erebot_Module_ServerCapabilities',
-                                Erebot_Connection::MODULE_BY_NAME);
+            'Erebot_Module_ServerCapabilities'
+        );
 
         foreach ($this->_nicks as $token => &$nick) {
             if (!$capabilities->irccasecmp($nick, $srcNick))
@@ -108,8 +115,8 @@ extends Erebot_Module_Base
         $srcNick        = (string) $event->getTarget();
 
         $capabilities   =   $this->_connection->getModule(
-                                'Erebot_Module_ServerCapabilities',
-                                Erebot_Connection::MODULE_BY_NAME);
+            'Erebot_Module_ServerCapabilities'
+        );
 
         foreach ($this->_nicks as $token => &$nick) {
             if (!$capabilities->irccasecmp($nick, $srcNick))
