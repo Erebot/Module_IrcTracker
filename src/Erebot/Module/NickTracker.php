@@ -54,11 +54,14 @@ extends Erebot_Module_Base
         $this->_nicks[] = $nick;
         end($this->_nicks);
         $key = key($this->_nicks);
-        return $key;
+        return new Erebot_Module_NickTracker_Token($this, $key);
     }
 
     public function stopTracking($token)
     {
+        if ($token instanceof Erebot_Module_NickTracker_Token)
+            return $token->__destruct();
+
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
             throw new Erebot_NotFoundException(
@@ -70,6 +73,9 @@ extends Erebot_Module_Base
 
     public function getNick($token)
     {
+        if ($token instanceof Erebot_Module_NickTracker_Token)
+            return (string) $token;
+
         if (!isset($this->_nicks[$token])) {
             $translator = $this->getTranslator(NULL);
             throw new Erebot_NotFoundException(
