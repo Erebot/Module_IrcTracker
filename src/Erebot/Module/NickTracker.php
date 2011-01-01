@@ -90,12 +90,8 @@ extends Erebot_Module_Base
         $oldNick        = (string) $event->getSource();
         $newNick        = (string) $event->getTarget();
 
-        $capabilities   =   $this->_connection->getModule(
-            'Erebot_Module_ServerCapabilities'
-        );
-
         foreach ($this->_nicks as $token => &$nick) {
-            if (!$capabilities->irccasecmp($nick, $oldNick))
+            if (!$this->_connection->irccasecmp($nick, $oldNick))
                 $this->_nicks[$token] = $newNick;
         }
         unset($nick);
@@ -105,12 +101,8 @@ extends Erebot_Module_Base
     {
         $srcNick        = (string) $event->getSource();
 
-        $capabilities   =   $this->_connection->getModule(
-            'Erebot_Module_ServerCapabilities'
-        );
-
         foreach ($this->_nicks as $token => &$nick) {
-            if (!$capabilities->irccasecmp($nick, $srcNick))
+            if (!$this->_connection->irccasecmp($nick, $srcNick))
                 unset($this->_nicks[$token]);
         }
         unset($nick);
@@ -120,12 +112,8 @@ extends Erebot_Module_Base
     {
         $srcNick        = (string) $event->getTarget();
 
-        $capabilities   =   $this->_connection->getModule(
-            'Erebot_Module_ServerCapabilities'
-        );
-
         foreach ($this->_nicks as $token => &$nick) {
-            if (!$capabilities->irccasecmp($nick, $srcNick))
+            if (!$this->_connection->irccasecmp($nick, $srcNick))
                 unset($this->_nicks[$token]);
         }
         unset($nick);
