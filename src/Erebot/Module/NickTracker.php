@@ -30,13 +30,13 @@ extends Erebot_Module_Base
         if ($flags & self::RELOAD_HANDLERS) {
             $handler = new Erebot_EventHandler(
                 array($this, 'handleNick'),
-                'Erebot_Event_Nick'
+                new Erebot_Event_Match_InstanceOf('Erebot_Event_Nick')
             );
             $this->_connection->addEventHandler($handler);
 
             $handler = new Erebot_EventHandler(
                 array($this, 'handlePartOrQuit'),
-                'Erebot_Event_Quit'
+                new Erebot_Event_Match_InstanceOf('Erebot_Event_Quit')
             );
             $this->_connection->addEventHandler($handler);
         }
