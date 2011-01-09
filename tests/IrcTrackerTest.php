@@ -22,7 +22,7 @@ require_once(
     DIRECTORY_SEPARATOR . 'bootstrap.php'
 );
 
-class   NickTrackerTest
+class   IrcTrackerTest
 extends ErebotModuleTestCase
 {
     public function setUp()
@@ -34,12 +34,19 @@ extends ErebotModuleTestCase
             ->method('getModule')
             ->will($this->returnValue($this));
 
-        $this->_module = new Erebot_Module_NickTracker(
+        $this->_module = new Erebot_Module_IrcTracker(
             $this->_connection,
             NULL
         );
         $this->_module->reload( Erebot_Module_Base::RELOAD_ALL |
                                 Erebot_Module_Base::RELOAD_INIT);
+
+        $event = new Erebot_Event_Join(
+            $this->_connection,
+            '#test',
+            'foo!ident@host'
+        );
+        $this->_module->handleJoin($event);
     }
 
     public function tearDown()
@@ -58,7 +65,7 @@ extends ErebotModuleTestCase
      */
     public function testInvalidToken()
     {
-        $this->_module->getNick(NULL);
+        $this->_module->getInfo(NULL, Erebot_Module_IrcTracker::INFO_NICK);
     }
 
     public function testTrackingThroughNickChanges()
@@ -85,15 +92,8 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Kick($this->_connection, '#test', 'bar', 'foo', 'Doh!');
-        $this->_module->handleKick($event);
-        $this->assertEquals("", (string) $token);
-
-        try {
-            unset($token);
-            $this->fail('Expected the token to have been invalidated');
-        }
-        catch (Erebot_NotFoundException $e) {
-        }
+        $this->_module->handleLeaving($event);
+        $this->assertEquals("???", (string) $token);
     }
 
     public function testTrackingThroughPart()
@@ -102,15 +102,8 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Part($this->_connection, '#test', 'foo', 'Doh!');
-        $this->_module->handlePartOrQuit($event);
-        $this->assertEquals("", (string) $token);
-
-        try {
-            unset($token);
-            $this->fail('Expected the token to have been invalidated');
-        }
-        catch (Erebot_NotFoundException $e) {
-        }
+        $this->_module->handleLeaving($event);
+        $this->assertEquals("???", (string) $token);
     }
 
     public function testTrackingThroughQuit()
@@ -119,15 +112,8 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Quit($this->_connection, 'foo', 'Doh!');
-        $this->_module->handlePartOrQuit($event);
-        $this->assertEquals("", (string) $token);
-
-        try {
-            unset($token);
-            $this->fail('Expected the token to have been invalidated');
-        }
-        catch (Erebot_NotFoundException $e) {
-        }
+        $this->_module->handleLeaving($event);
+        $this->assertEquals("???", (string) $token);
     }
 }
 

@@ -16,29 +16,56 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class   Erebot_Module_NickTracker_Token
+class   Erebot_Module_IrcTracker_Token
 {
     protected $_tracker;
     protected $_token;
 
-    public function __construct(Erebot_Module_NickTracker &$tracker, $token)
+    public function __construct(Erebot_Module_IrcTracker &$tracker, $token)
     {
         $this->_tracker =&  $tracker;
         $this->_token   =   $token;
     }
 
-    public function __destruct()
+    public function getNick()
     {
-        $this->_tracker->stopTracking($this->_token);
+        return $this->_tracker->getInfo(
+            $this->_token,
+            Erebot_Module_IrcTracker::INFO_NICK
+        );
+    }
+
+    public function getIdent()
+    {
+        return $this->_tracker->getInfo(
+            $this->_token,
+            Erebot_Module_IrcTracker::INFO_IDENT
+        );
+    }
+
+    public function getHost()
+    {
+        return $this->_tracker->getInfo(
+            $this->_token,
+            Erebot_Module_IrcTracker::INFO_HOST
+        );
+    }
+
+    public function getMask()
+    {
+        return $this->_tracker->getInfo(
+            $this->_token,
+            Erebot_Module_IrcTracker::INFO_MASK
+        );
     }
 
     public function __toString()
     {
         try {
-            return $this->_tracker->getNick($this->_token);
+            return $this->getNick();
         }
         catch (Erebot_NotFoundException $e) {
-            return "";
+            return "???";
         }
     }
 }
