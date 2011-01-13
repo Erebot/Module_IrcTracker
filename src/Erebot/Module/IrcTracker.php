@@ -84,6 +84,18 @@ extends Erebot_Module_Base
                 Erebot_Interface_Event_Raw::RPL_NAMEREPLY
             );
             $this->_connection->addRawHandler($raw);
+
+            $handler = new Erebot_EventHandler(
+                array($this, 'handleChanModeAddition'),
+                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_ChanModeGiven')
+            );
+            $this->_connection->addEventHandler($handler);
+
+            $handler = new Erebot_EventHandler(
+                array($this, 'handleChanModeRemoval'),
+                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_ChanModeTaken')
+            );
+            $this->_connection->addEventHandler($handler);
         }
     }
 
@@ -291,6 +303,37 @@ extends Erebot_Module_Base
         $this->_chans[$event->getChan()][$key] = array();
     }
 
+    public function handleChanModeAddition(Erebot_Interface_Event_ChanModeGiven $event)
+    {
+        $user       = $event->getSource();
+        $nick       = Erebot_Utils::extractNick($user);
+        $normNick   = $this->_connection->normalizeNick($nick);
+        $key        = array_search($normNick, $this->_nicks);
+        if ($key === FALSE)
+            return;
+
+        $this->_chans[$event->getChan()][$key][] = $event->MODE_LETTER;
+    }
+
+    public function handleChanModeRemoval(Erebot_Interface_Event_ChanModeTaken $event)
+    {
+        $user       = $event->getSource();
+        $nick       = Erebot_Utils::extractNick($user);
+        $normNick   = $this->_connection->normalizeNick($nick);
+        $key        = array_search($normNick, $this->_nicks);
+        if ($key === FALSE)
+            return;
+
+        $key2       = array_search(
+            $event->MODE_LETTER,
+            $this->_chans[$event->getChan()][$key]
+        );
+        if ($key2 === FALSE)
+            return;
+
+        unset($this->_chans[$event->getChan()][$key][$key2]);
+    }
+
     public function getCommonChans($nick)
     {
         $nick   = Erebot_Utils::extractNick($nick);
@@ -307,7 +350,7 @@ extends Erebot_Module_Base
         return $results;
     }
 
-    public function getFromIAL($mask, $chan = NULL)
+    public function IAL($mask, $chan = NULL)
     {
         $results = array();
 
@@ -344,6 +387,13 @@ extends Erebot_Module_Base
                 $results[] = $full;
         }
         return $results;
+    }
+
+    public function userPriviledges($chan, $nick)
+    {
+        if (!isset($this->_chans[$chan][$nick]))
+            throw new Erebot_NotFoundException('No such channel or user');
+        return $this->_chans[$chan][$nick];
     }
 }
 
