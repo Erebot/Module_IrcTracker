@@ -19,6 +19,7 @@
 class   Erebot_Module_IrcTracker
 extends Erebot_Module_Base
 {
+    # @TODO: method to find users by their channel modes
     static protected $_metadata = array(
         'requires'  =>  array(
             'Erebot_Module_ServerCapabilities',
@@ -85,6 +86,12 @@ extends Erebot_Module_Base
             );
             $this->_connection->addRawHandler($raw);
 
+            $raw = new Erebot_RawHandler(
+                array($this, 'handleWho'),
+                Erebot_Interface_Event_Raw::RPL_WHOREPLY
+            );
+            $this->_connection->addRawHandler($raw);
+
             $handler = new Erebot_EventHandler(
                 array($this, 'handleChanModeAddition'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_ChanModeGiven')
@@ -123,6 +130,18 @@ extends Erebot_Module_Base
             return call_user_func(array($token, 'get'.$info));
 
         $translator = $this->getTranslator(NULL);
+        if (is_string($token)) {
+            $token = $this->_connection->normalizeNick(
+                Erebot_Utils::extractNick($token)
+            );
+            $token = array_search($token, $this->_nicks);
+            if ($token === FALSE) {
+                throw new Erebot_NotFoundException(
+                    $translator->gettext('No such user')
+                );
+            }
+        }
+
         if (!isset($this->_IAL[$token])) {
             throw new Erebot_NotFoundException(
                 $translator->gettext('No such token')
@@ -198,9 +217,10 @@ extends Erebot_Module_Base
 
     public function handleNames(Erebot_Interface_Event_Raw $raw)
     {
-        $chan   = $raw->getText()->getTokens(2, 1);
+        $text   = $raw->getText();
+        $chan   = $text[1];
         $users  = new Erebot_TextWrapper(
-            ltrim($raw->getText()->getTokens(3), ':')
+            ltrim($raw->getText()->getTokens(2), ':')
         );
 
         try {
@@ -254,7 +274,7 @@ extends Erebot_Module_Base
             }
 
             if (!isset($this->_IAL[$key]) ||
-                ($this->_IAL[$key] === NULL && $ident !== NULL)) {
+                ($this->_IAL[$key]['ident'] === NULL && $ident !== NULL)) {
                 $this->_IAL[$key] = array(
                     'nick'  => $nick,
                     'ident' => $ident,
@@ -263,6 +283,29 @@ extends Erebot_Module_Base
             }
 
             $this->_chans[$chan][$key] = $modes;
+        }
+    }
+
+    public function handleWho(Erebot_Interface_Event_Raw $raw)
+    {
+        $text       = $raw->getText();
+        $normNick   = $this->_connection->normalizeNick($text[4]);
+        $key        = array_search($normNick, $this->_nicks);
+
+        // Add it to to the list of known nicks
+        // if it's not already present.
+        // Also, try to populate the IAL.
+        if ($key === FALSE) {
+            $key = $this->_sequence++;
+            $this->_nicks[$key] = $normNick;
+        }
+
+        if (!isset($this->_IAL[$key]) || $this->_IAL[$key]['ident'] === NULL) {
+            $this->_IAL[$key] = array(
+                'nick'  => $text[4],
+                'ident' => $text[1],
+                'host'  => $text[2],
+            );
         }
     }
 
