@@ -19,7 +19,6 @@
 class   Erebot_Module_IrcTracker
 extends Erebot_Module_Base
 {
-    # @TODO: method to find users by their channel modes
     static protected $_metadata = array(
         'requires'  =>  array(
             'Erebot_Module_ServerCapabilities',
@@ -348,19 +347,20 @@ extends Erebot_Module_Base
 
     public function handleChanModeAddition(Erebot_Interface_Event_ChanModeGiven $event)
     {
-        $user       = $event->getSource();
+        $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
         $normNick   = $this->_connection->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
         if ($key === FALSE)
             return;
 
-        $this->_chans[$event->getChan()][$key][] = $event->MODE_LETTER;
+        $this->_chans[$event->getChan()][$key][] =
+            Erebot_Utils::getVStatic($event, 'MODE_LETTER');
     }
 
     public function handleChanModeRemoval(Erebot_Interface_Event_ChanModeTaken $event)
     {
-        $user       = $event->getSource();
+        $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
         $normNick   = $this->_connection->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
@@ -368,7 +368,7 @@ extends Erebot_Module_Base
             return;
 
         $key2       = array_search(
-            $event->MODE_LETTER,
+            Erebot_Utils::getVStatic($event, 'MODE_LETTER'),
             $this->_chans[$event->getChan()][$key]
         );
         if ($key2 === FALSE)
@@ -415,7 +415,7 @@ extends Erebot_Module_Base
                 );
 
             // Search only matching users on that channel.
-            foreach ($this->_chans[$chan] as $key) {
+            foreach (array_keys($this->_chans[$chan]) as $key) {
                 $entry  = $this->_IAL[$key];
                 $full   = $entry['nick'].'!'.$entry['ident'].'@'.$entry['host'];
                 if (preg_match($pattern, $full) == 1)
@@ -437,6 +437,27 @@ extends Erebot_Module_Base
         if (!isset($this->_chans[$chan][$nick]))
             throw new Erebot_NotFoundException('No such channel or user');
         return $this->_chans[$chan][$nick];
+    }
+
+    public function byChannelModes($chan, $modes, $negate = FALSE)
+    {
+        if (!isset($this->_chans[$chan]))
+            throw new Erebot_NotFoundException('No such channel');
+        if (!is_array($modes))
+            $modes = array($modes);
+        $results = array();
+        $nbModes = count($modes);
+        foreach ($this->_chans[$chan] as $key => $chmodes) {
+            if ($nbModes) {
+                $commonCount = count(array_intersect($modes, $chmodes));
+                if (($commonCount == $nbModes && $negate === FALSE) ||
+                    ($commonCount == 0 && $negate === TRUE))
+                    $results[] = $this->_nicks[$key];
+            }
+            else if (((bool) count($chmodes)) == $negate)
+                $results[] = $this->_nicks[$key];
+        }
+        return $results;
     }
 }
 

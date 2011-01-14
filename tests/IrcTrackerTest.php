@@ -115,5 +115,83 @@ extends ErebotModuleTestCase
         $this->_module->handleLeaving($event);
         $this->assertEquals("???", (string) $token);
     }
+
+    public function testByChannelModes()
+    {
+        $users = array(
+            'q' => 'Erebot_Event_Owner',
+            'a' => 'Erebot_Event_Protect',
+            'o' => 'Erebot_Event_Op',
+            'h' => 'Erebot_Event_Halfop',
+            'v' => 'Erebot_Event_Voice',
+            'foo'   => FALSE,
+        );
+
+        // Create a few users and give them some power.
+        foreach ($users as $user => $cls) {
+            if ($cls === FALSE)
+                continue;
+
+            $event = new Erebot_Event_Join(
+                $this->_connection,
+                '#test',
+                $user.'!ident@host'
+            );
+            $this->_module->handleJoin($event);
+
+            $event = new $cls(
+                $this->_connection,
+                '#test', 'foo', $user
+            );
+            $this->_module->handleChanModeAddition($event);
+        }
+
+        foreach ($users as $user => $cls) {
+            $modes = array($user);
+            $expected = array_diff(array_keys($users), $modes);
+            if ($cls === FALSE)
+                $modes = array();
+
+            $received = $this->_module->byChannelModes('#test', $modes, TRUE);
+            sort($expected);
+            sort($received);
+            $this->assertEquals(
+                $expected, $received,
+                "Negative search for '$user'"
+            );
+
+            $this->assertEquals(
+                array($user),
+                $this->_module->byChannelModes('#test', $modes),
+                "Positive search for '$user'"
+            );
+        }
+
+        // Protect "q".
+        $event = new Erebot_Event_Protect(
+            $this->_connection,
+            '#test', 'foo', 'q'
+        );
+        $this->_module->handleChanModeAddition($event);
+
+        // We expect only "q" to be returned
+        // as it is now +qa.
+        $modes = array('q', 'a');
+        $this->assertEquals(
+            array('q'),
+            $this->_module->byChannelModes('#test', $modes),
+            "Positive search for multiple modes"
+        );
+
+        // We expect all users except those which are +q/+a.
+        $expected = array_diff(array_keys($users), $modes);
+        $received = $this->_module->byChannelModes('#test', $modes, TRUE);
+        sort($expected);
+        sort($received);
+        $this->assertEquals(
+            $expected, $received,
+            "Negative search for multiple modes"
+        );
+    }
 }
 
