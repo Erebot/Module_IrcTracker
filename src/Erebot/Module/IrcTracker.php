@@ -377,6 +377,19 @@ extends Erebot_Module_Base
         unset($this->_chans[$event->getChan()][$key][$key2]);
     }
 
+    public function isOn($chan, $nick = NULL)
+    {
+        if ($nick === NULL)
+            return isset($this->_chans[$chan]);
+
+        $nick   = Erebot_Utils::extractNick($nick);
+        $nick   = $this->_connection->normalizeNick($nick);
+        $key    = array_search($nick, $this->_nicks);
+        if ($key === FALSE)
+            throw new Erebot_NotFoundException('No such user');
+        return isset($this->_chans[$chan][$key]);
+    }
+
     public function getCommonChans($nick)
     {
         $nick   = Erebot_Utils::extractNick($nick);
