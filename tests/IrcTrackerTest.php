@@ -29,6 +29,11 @@ extends ErebotModuleTestCase
     {
         parent::setUp();
 
+        $this->_networkConfig
+            ->expects($this->any())
+            ->method('parseInt')
+            ->will($this->returnValue(0));
+
         $this->_module = new Erebot_Module_IrcTracker(
             $this->_connection,
             NULL

@@ -105,63 +105,64 @@ extends Erebot_Module_Base
         }
     }
 
-    public function startTracking($nick)
+    protected function _updateUser($nick, $ident, $host)
     {
-        if (!is_string($nick)) {
-            $translator = $this->getTranslator(NULL);
-            throw new Erebot_InvalidValueException(
-                $translator->gettext('Not a valid nick')
+        $normNick = $this->_connection->normalizeNick($nick);
+        $key    = array_search($nick, $this->_nicks);
+        if ($key === FALSE)
+            return;
+
+        if (!isset($this->_IAL[$key]) || $this->_IAL[$key]['ident'] === NULL) {
+            $this->_IAL[$key] = array(
+                'nick'  => $nick,
+                'ident' => $ident,
+                'host'  => $host,
+                'ison'  => TRUE,
+                'TIMER' => NULL,
             );
+            return;
         }
 
-        $nick = Erebot_Utils::extractNick(
-            $this->_connection->normalizeNick($nick)
+        if (isset($this->_IAL[$key]['TIMER'])) {
+            $this->removeTimer($this->_IAL[$key]['TIMER']);
+        }
+
+        if ($ident !== NULL && (
+            $this->_IAL[$key]['ident'] != $ident ||
+            $this->_IAL[$key]['host'] != $host)) {
+            unset($this->_nicks[$key]);
+            unset($this->_IAL[$key]);
+            $key = $this->_sequence++;
+        }
+
+        $this->_IAL[$key] = array(
+            'nick'  => $nick,
+            'ident' => $ident,
+            'host'  => $host,
+            'ison'  => TRUE,
+            'TIMER' => NULL,
         );
-        $key = array_search($nick, $this->_nicks);
-        if ($key === FALSE)
-            throw new Erebot_NotFoundException('No such user');
-        return new Erebot_Module_IrcTracker_Token($this, $key);
     }
 
-    public function getInfo($token, $info)
+    protected function _removeUser($nick)
     {
-        if ($token instanceof Erebot_Module_IrcTracker_Token)
-            return call_user_func(array($token, 'get'.$info));
+        $nick   = $this->_connection->normalizeNick($nick);
+        $key    = array_search($nick, $this->_nicks);
 
-        $translator = $this->getTranslator(NULL);
-        if (is_string($token)) {
-            $token = $this->_connection->normalizeNick(
-                Erebot_Utils::extractNick($token)
-            );
-            $token = array_search($token, $this->_nicks);
-            if ($token === FALSE) {
-                throw new Erebot_NotFoundException(
-                    $translator->gettext('No such user')
-                );
-            }
-        }
+        if ($key === FALSE)
+            return;
 
-        if (!isset($this->_IAL[$token])) {
-            throw new Erebot_NotFoundException(
-                $translator->gettext('No such token')
-            );
-        }
+        $this->_IAL[$key]['TIMER'] = NULL;
+        if (!isset($this->_nicks[$key]) || count($this->getCommonChans($nick)))
+            return;
 
-        $info = strtolower($info);
-        if ($info == 'mask') {
-            if ($this->_IAL[$token]['ident'] === NULL)
-                return $this->_IAL[$token]['nick'].'!*@*';
-            return  $this->_IAL[$token]['nick'].'!'.
-                    $this->_IAL[$token]['ident'].'@'.
-                    $this->_IAL[$token]['host'];
-        }
+        unset($this->_nicks[$key]);
+        unset($this->_IAL[$key]);
+    }
 
-        if (!isset($this->_IAL[$token][$info])) {
-            throw new Erebot_NotFoundException(
-                $translator->gettext('No such information')
-            );
-        }
-        return $this->_IAL[$token][$info];
+    public function removeUser(Erebot_Interface_Timer $timer, $nick)
+    {
+        $this->_removeUser($nick);
     }
 
     public function handleNick(Erebot_Interface_Event_Generic &$event)
@@ -174,6 +175,8 @@ extends Erebot_Module_Base
         $key = array_search($normOldNick, $this->_nicks);
         if ($key === FALSE)
             return;
+
+        $this->_removeUser($normNewNick);
         $this->_nicks[$key]         = $normNewNick;
         $this->_IAL[$key]['nick']   = $newNick;
     }
@@ -198,8 +201,21 @@ extends Erebot_Module_Base
             unset($this->_chans[$event->getChan()][$key]);
 
         if (!count($this->getCommonChans($nick))) {
-            unset($this->_nicks[$key]);
-            unset($this->_IAL[$key]);
+            $this->_IAL[$key]['ison'] = FALSE;
+            $delay = $this->parseInt('expire_delay', 60);
+            if ($delay < 0)
+                $delay = 0;
+
+            if (!$delay) {
+                $this->_removeUser($nick);
+            }
+            else {
+                $timer = new Erebot_Timer(
+                    array($this, 'removeUser'),
+                    $delay, FALSE, array($nick)
+                );
+                $this->addTimer($timer);
+            }
         }
     }
 
@@ -272,15 +288,7 @@ extends Erebot_Module_Base
                 $host   = $parts[1];
             }
 
-            if (!isset($this->_IAL[$key]) ||
-                ($this->_IAL[$key]['ident'] === NULL && $ident !== NULL)) {
-                $this->_IAL[$key] = array(
-                    'nick'  => $nick,
-                    'ident' => $ident,
-                    'host'  => $host,
-                );
-            }
-
+            $this->_updateUser($nick, $ident, $host);
             $this->_chans[$chan][$key] = $modes;
         }
     }
@@ -299,13 +307,7 @@ extends Erebot_Module_Base
             $this->_nicks[$key] = $normNick;
         }
 
-        if (!isset($this->_IAL[$key]) || $this->_IAL[$key]['ident'] === NULL) {
-            $this->_IAL[$key] = array(
-                'nick'  => $text[4],
-                'ident' => $text[1],
-                'host'  => $text[2],
-            );
-        }
+        $this->_updateUser($text[4], $text[1], $text[2]);
     }
 
     public function handleJoin(Erebot_Interface_Event_Generic $event)
@@ -333,15 +335,7 @@ extends Erebot_Module_Base
             $host   = $parts[1];
         }
 
-        if (!isset($this->_IAL[$key]) ||
-            ($this->_IAL[$key] === NULL && $ident !== NULL)) {
-            $this->_IAL[$key] = array(
-                'nick'  => $nick,
-                'ident' => $ident,
-                'host'  => $host,
-            );
-        }
-
+        $this->_updateUser($nick, $ident, $host);
         $this->_chans[$event->getChan()][$key] = array();
     }
 
@@ -375,6 +369,65 @@ extends Erebot_Module_Base
             return;
 
         unset($this->_chans[$event->getChan()][$key][$key2]);
+    }
+
+    public function startTracking($nick)
+    {
+        if (!is_string($nick)) {
+            $translator = $this->getTranslator(NULL);
+            throw new Erebot_InvalidValueException(
+                $translator->gettext('Not a valid nick')
+            );
+        }
+
+        $nick = Erebot_Utils::extractNick(
+            $this->_connection->normalizeNick($nick)
+        );
+        $key = array_search($nick, $this->_nicks);
+        if ($key === FALSE)
+            throw new Erebot_NotFoundException('No such user');
+        return new Erebot_Module_IrcTracker_Token($this, $key);
+    }
+
+    public function getInfo($token, $info)
+    {
+        if ($token instanceof Erebot_Module_IrcTracker_Token)
+            return call_user_func(array($token, 'get'.$info));
+
+        $translator = $this->getTranslator(NULL);
+        if (is_string($token)) {
+            $token = $this->_connection->normalizeNick(
+                Erebot_Utils::extractNick($token)
+            );
+            $token = array_search($token, $this->_nicks);
+            if ($token === FALSE) {
+                throw new Erebot_NotFoundException(
+                    $translator->gettext('No such user')
+                );
+            }
+        }
+
+        if (!isset($this->_IAL[$token])) {
+            throw new Erebot_NotFoundException(
+                $translator->gettext('No such token')
+            );
+        }
+
+        $info = strtolower($info);
+        if ($info == 'mask') {
+            if ($this->_IAL[$token]['ident'] === NULL)
+                return $this->_IAL[$token]['nick'].'!*@*';
+            return  $this->_IAL[$token]['nick'].'!'.
+                    $this->_IAL[$token]['ident'].'@'.
+                    $this->_IAL[$token]['host'];
+        }
+
+        if (!isset($this->_IAL[$token][$info])) {
+            throw new Erebot_NotFoundException(
+                $translator->gettext('No such information')
+            );
+        }
+        return $this->_IAL[$token][$info];
     }
 
     public function isOn($chan, $nick = NULL)
