@@ -29,11 +29,6 @@ extends ErebotModuleTestCase
     {
         parent::setUp();
 
-        $this->_connection
-            ->expects($this->any())
-            ->method('getModule')
-            ->will($this->returnValue($this));
-
         $this->_module = new Erebot_Module_IrcTracker(
             $this->_connection,
             NULL
@@ -53,11 +48,6 @@ extends ErebotModuleTestCase
     {
         unset($this->_module);
         parent::tearDown();
-    }
-
-    // Mock ServerCapabilities module.
-    public function irccasecmp($a, $b) {
-        return strcasecmp($a, $b);
     }
 
     /**
@@ -192,6 +182,22 @@ extends ErebotModuleTestCase
             $expected, $received,
             "Negative search for multiple modes"
         );
+    }
+
+    public function testIsOn()
+    {
+        // The bot is on #test, so this is supposedly TRUE.
+        $this->assertEquals(TRUE, $this->_module->isOn('#test'));
+
+        // "foo" is on #test too, so this is also TRUE.
+        $this->assertEquals(TRUE, $this->_module->isOn('#test', 'foo'));
+
+        // But "bar" is not, so this is FALSE.
+        $this->assertEquals(FALSE, $this->_module->isOn('#test', 'bar'));
+
+        // Last but not least, the bot is not on #strike,
+        // so this is also FALSE.
+        $this->assertEquals(FALSE, $this->_module->isOn('#strike'));
     }
 }
 

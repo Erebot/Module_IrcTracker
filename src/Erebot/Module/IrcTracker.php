@@ -386,7 +386,7 @@ extends Erebot_Module_Base
         $nick   = $this->_connection->normalizeNick($nick);
         $key    = array_search($nick, $this->_nicks);
         if ($key === FALSE)
-            throw new Erebot_NotFoundException('No such user');
+            return FALSE;
         return isset($this->_chans[$chan][$key]);
     }
 
