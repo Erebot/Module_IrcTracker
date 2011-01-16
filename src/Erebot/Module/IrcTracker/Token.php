@@ -59,6 +59,14 @@ class   Erebot_Module_IrcTracker_Token
         );
     }
 
+    public function isOn()
+    {
+        return $this->_tracker->getInfo(
+            $this->_token,
+            Erebot_Module_IrcTracker::INFO_ISON
+        );
+    }
+
     public function __toString()
     {
         try {
