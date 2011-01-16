@@ -38,7 +38,7 @@ extends ErebotModuleTestCase
     {
         parent::setUp();
 
-        $this->_networkConfig
+        $this->_serverConfig
             ->expects($this->any())
             ->method('parseInt')
             ->will($this->returnValue(10));
