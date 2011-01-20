@@ -339,9 +339,6 @@ extends Erebot_Module_Base
 
     public function startTracking($nick, $cls = 'Erebot_Module_IrcTracker_Token')
     {
-        if ($nick instanceof $cls)
-            return $nick;
-
         if ($nick instanceof Erebot_Identity)
             $identity = $nick;
         else {
@@ -351,7 +348,7 @@ extends Erebot_Module_Base
                     $translator->gettext('Not a valid nick')
                 );
             }
-            $identity   = new Erebot_Identity($nick);
+            $identity = new Erebot_Identity($nick);
         }
 
         $nick   = $this->_connection->normalizeNick($identity->getNick());
@@ -408,7 +405,7 @@ extends Erebot_Module_Base
                     $this->_IAL[$token]['host'];
         }
 
-        if (!isset($this->_IAL[$token][$info])) {
+        if (!array_key_exists($info, $this->_IAL[$token])) {
             throw new Erebot_InvalidValueException(
                 $translator->gettext('No such information')
             );
