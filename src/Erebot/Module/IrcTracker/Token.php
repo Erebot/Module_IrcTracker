@@ -21,10 +21,10 @@ class   Erebot_Module_IrcTracker_Token
     protected $_tracker;
     protected $_token;
 
-    public function __construct(Erebot_Module_IrcTracker &$tracker, $token)
+    public function __construct(Erebot_Module_IrcTracker $tracker, $token)
     {
-        $this->_tracker =&  $tracker;
-        $this->_token   =   $token;
+        $this->_tracker = $tracker;
+        $this->_token   = $token;
     }
 
     public function getNick()
