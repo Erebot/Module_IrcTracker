@@ -36,7 +36,7 @@ extends Erebot_Module_Base
     const INFO_MASK     = 'Mask';
     const INFO_ISON     = 'IsOn';
 
-    public function reload($flags)
+    public function _reload($flags)
     {
         if ($this->_channel !== NULL)
             return;
@@ -103,6 +103,14 @@ extends Erebot_Module_Base
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_ChanModeTaken')
             );
             $this->_connection->addEventHandler($handler);
+        }
+    }
+
+    protected function _unload()
+    {
+        foreach ($this->_IAL as $entry) {
+            if (isset($entry['TIMER']))
+                $this->removeTimer($entry['TIMER']);
         }
     }
 
