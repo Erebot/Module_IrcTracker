@@ -23,7 +23,10 @@
 class       Erebot_Module_IrcTracker_Token
 implements  Erebot_Interface_Identity
 {
+    /// Reference to the tracker this token belongs to.
     protected $_tracker;
+
+    /// The actuel token, which uniquely identifies users on an IRC network.
     protected $_token;
 
     /**
