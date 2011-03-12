@@ -43,12 +43,12 @@ extends ErebotModuleTestCase
             ->method('parseInt')
             ->will($this->returnValue(10));
 
-        $this->_module = new Erebot_Module_IrcTracker(
+        $this->_module = new Erebot_Module_IrcTracker(NULL);
+        $this->_module->reload(
             $this->_connection,
-            NULL
+            Erebot_Module_Base::RELOAD_ALL |
+            Erebot_Module_Base::RELOAD_INIT
         );
-        $this->_module->reload( Erebot_Module_Base::RELOAD_ALL |
-                                Erebot_Module_Base::RELOAD_INIT);
 
         $event = new Erebot_Event_Join(
             $this->_connection,
