@@ -1,20 +1,21 @@
+msgid   "unknown.user"
+msgstr  "Utilisateur inconnu"
+#
+msgid   "unknown.token"
+msgstr  "Jeton inconnu"
+#
+msgid   "unknown.info"
+msgstr  "Information indisponible"
+#
+msgid   "invalid.nick"
+msgstr  "Pseudonyme non valide"
+#
 msgid   ""
-msgstr  "Project-Id-Version: \n"
-        "POT-Creation-Date: \n"
-        "PO-Revision-Date: \n"
+msgstr  "Project-Id-Version: Erebot_Module_IrcTracker 0.5.0\n"
+        "PO-Revision-Date: 2011-04-16 12:24+0200\n"
         "Last-Translator: \n"
         "Language-Team: \n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=utf-8\n"
         "Content-Transfer-Encoding: 8bit\n"
-#
-#
-# File: NickTracker.php, line: 43
-# File: NickTracker.php, line: 51
-msgid   "No such token"
-msgstr  "Entrée introuvable"
-#
-#
-# File: NickTracker.php, line: 31
-msgid   "Not a valid nick"
-msgstr  "Pseudonyme non valide"
+
