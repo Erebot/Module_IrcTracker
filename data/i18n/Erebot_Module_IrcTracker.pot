@@ -1,25 +1,32 @@
-msgid ""
-msgstr ""
-"Project-Id-Version: Erebot_Module_IrcTracker 0.3.2\n"
-"Report-Msgid-Bugs-To: clicky@erebot.net\n"
-"POT-Creation-Date: 2011-04-16 12:24+0200\n"
-"PO-Revision-Date: 2011-04-16 12:24+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-msgid "No such information"
-msgstr ""
-
-msgid "No such token"
-msgstr ""
-
-msgid "No such user"
-msgstr ""
-
-msgid "Not a valid nick"
-msgstr ""
-
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: Erebot_Module_IrcTracker 0.3.2\n"
+        "Report-Msgid-Bugs-To: clicky@erebot.net\n"
+        "POT-Creation-Date: 2011-06-03 22:25+0200\n"
+        "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+        "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+        "Language-Team: LANGUAGE <LL@li.org>\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=CHARSET\n"
+        "Content-Transfer-Encoding: 8bit\n"
+#
+# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 418
+msgid   "No such information"
+msgstr  ""
+#
+# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 403
+msgid   "No such token"
+msgstr  ""
+#
+# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 367
+# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 396
+msgid   "No such user"
+msgstr  ""
+#
+# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 356
+msgid   "Not a valid nick"
+msgstr  ""
