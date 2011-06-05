@@ -44,7 +44,7 @@ implements  Erebot_Interface_Identity
         $this->_token   = $token;
     }
 
-    // Documented in the interface.
+    /// \copydoc Erebot_Interface_Identity::getNick()
     public function getNick()
     {
         return $this->_tracker->getInfo(
@@ -53,7 +53,7 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    // Documented in the interface.
+    /// \copydoc Erebot_Interface_Identity::getIdent()
     public function getIdent()
     {
         return $this->_tracker->getInfo(
@@ -62,7 +62,7 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    // Documented in the interface.
+    /// \copydoc Erebot_Interface_Identity::getHost()
     public function getHost()
     {
         return $this->_tracker->getInfo(
@@ -71,7 +71,7 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    // Documented in the interface.
+    /// \copydoc Erebot_Interface_Identity::getMask()
     public function getMask()
     {
         return $this->_tracker->getInfo(
@@ -96,7 +96,7 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    // Documented in the interface.
+    /// \copydoc Erebot_Interface_Identity::__toString()
     public function __toString()
     {
         try {
