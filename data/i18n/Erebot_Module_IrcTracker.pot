@@ -4,9 +4,9 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: Erebot_Module_IrcTracker 0.3.2\n"
-        "Report-Msgid-Bugs-To: clicky@erebot.net\n"
-        "POT-Creation-Date: 2011-06-03 22:25+0200\n"
+msgstr  "Project-Id-Version: Erebot_Module_IrcTracker 0.1.1\n"
+        "Report-Msgid-Bugs-To: i18n@erebot.net\n"
+        "POT-Creation-Date: 2011-06-07 01:06+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,19 +14,19 @@ msgstr  "Project-Id-Version: Erebot_Module_IrcTracker 0.3.2\n"
         "Content-Type: text/plain; charset=CHARSET\n"
         "Content-Transfer-Encoding: 8bit\n"
 #
-# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 418
+# File: src/Erebot/Module/IrcTracker.php, line: 418
 msgid   "No such information"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 403
+# File: src/Erebot/Module/IrcTracker.php, line: 403
 msgid   "No such token"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 367
-# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 396
+# File: src/Erebot/Module/IrcTracker.php, line: 367
+# File: src/Erebot/Module/IrcTracker.php, line: 396
 msgid   "No such user"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/IrcTracker/trunk/src/Erebot/Module/IrcTracker.php, line: 356
+# File: src/Erebot/Module/IrcTracker.php, line: 356
 msgid   "Not a valid nick"
 msgstr  ""
