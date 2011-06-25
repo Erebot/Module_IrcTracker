@@ -82,13 +82,13 @@ extends Erebot_Module_Base
 
             $raw = new Erebot_RawHandler(
                 array($this, 'handleNames'),
-                Erebot_Interface_Event_Raw::RPL_NAMEREPLY
+                $this->getRawRef('RPL_NAMEREPLY')
             );
             $this->_connection->addRawHandler($raw);
 
             $raw = new Erebot_RawHandler(
                 array($this, 'handleWho'),
-                Erebot_Interface_Event_Raw::RPL_WHOREPLY
+                $this->getRawRef('RPL_WHOREPLY')
             );
             $this->_connection->addRawHandler($raw);
 
