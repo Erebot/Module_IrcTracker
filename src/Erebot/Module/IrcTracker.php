@@ -49,66 +49,80 @@ extends Erebot_Module_Base
         if ($flags & self::RELOAD_HANDLERS) {
             // Handles some user changing his nickname.
             $handler = new Erebot_EventHandler(
-                array($this, 'handleNick'),
+                new Erebot_Callable(array($this, 'handleNick')),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Nick')
             );
             $this->_connection->addEventHandler($handler);
 
             // Handles some user joining a channel the bot is on.
             $handler = new Erebot_EventHandler(
-                array($this, 'handleJoin'),
+                new Erebot_Callable(array($this, 'handleJoin')),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Join')
             );
             $this->_connection->addEventHandler($handler);
 
             // Handles some user leaving a channel (for various reasons).
             $handler = new Erebot_EventHandler(
-                array($this, 'handleLeaving'),
+                new Erebot_Callable(array($this, 'handleLeaving')),
                 new Erebot_Event_Match_Any(
-                    new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Quit'),
-                    new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Part'),
-                    new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Kick')
+                    new Erebot_Event_Match_InstanceOf(
+                        'Erebot_Interface_Event_Quit'
+                    ),
+                    new Erebot_Event_Match_InstanceOf(
+                        'Erebot_Interface_Event_Part'
+                    ),
+                    new Erebot_Event_Match_InstanceOf(
+                        'Erebot_Interface_Event_Kick'
+                    )
                 )
             );
             $this->_connection->addEventHandler($handler);
 
             // Handles possible extensions.
             $handler = new Erebot_EventHandler(
-                array($this, 'handleCapabilities'),
-                new Erebot_Event_Match_InstanceOf('Erebot_Event_ServerCapabilities')
+                new Erebot_Callable(array($this, 'handleCapabilities')),
+                new Erebot_Event_Match_InstanceOf(
+                    'Erebot_Event_ServerCapabilities'
+                )
             );
             $this->_connection->addEventHandler($handler);
 
             // Handles information received when the bot joins a channel.
             $raw = new Erebot_RawHandler(
-                array($this, 'handleNames'),
+                new Erebot_Callable(array($this, 'handleNames')),
                 $this->getRawRef('RPL_NAMEREPLY')
             );
             $this->_connection->addRawHandler($raw);
 
             $raw = new Erebot_RawHandler(
-                array($this, 'handleWho'),
+                new Erebot_Callable(array($this, 'handleWho')),
                 $this->getRawRef('RPL_WHOREPLY')
             );
             $this->_connection->addRawHandler($raw);
 
             // Handles modes given/taken to/from users on IRC channels.
             $handler = new Erebot_EventHandler(
-                array($this, 'handleChanModeAddition'),
-                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Base_ChanModeGiven')
+                new Erebot_Callable(array($this, 'handleChanModeAddition')),
+                new Erebot_Event_Match_InstanceOf(
+                    'Erebot_Interface_Event_Base_ChanModeGiven'
+                )
             );
             $this->_connection->addEventHandler($handler);
 
             $handler = new Erebot_EventHandler(
-                array($this, 'handleChanModeRemoval'),
-                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Base_ChanModeTaken')
+                new Erebot_Callable(array($this, 'handleChanModeRemoval')),
+                new Erebot_Event_Match_InstanceOf(
+                    'Erebot_Interface_Event_Base_ChanModeTaken'
+                )
             );
             $this->_connection->addEventHandler($handler);
 
             // Handles users on the WATCH list (see also the WatchList module).
             $handler = new Erebot_EventHandler(
-                array($this, 'handleNotification'),
-                new Erebot_Event_Match_InstanceOf('Erebot_Event_NotificationAbstract')
+                new Erebot_Callable(array($this, 'handleNotification')),
+                new Erebot_Event_Match_InstanceOf(
+                    'Erebot_Event_NotificationAbstract'
+                )
             );
             $this->_connection->addEventHandler($handler);
         }
