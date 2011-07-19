@@ -90,7 +90,11 @@ extends ErebotModuleTestCase
     {
         // Simulate the timer going off.
         $this->_module->removeUser(
-            new Erebot_Timer(array($this->_module, 'removeUser'), 60, FALSE),
+            new Erebot_Timer(
+                new Erebot_Callable(array($this->_module, 'removeUser')),
+                60,
+                FALSE
+            ),
             'foo'
         );
 

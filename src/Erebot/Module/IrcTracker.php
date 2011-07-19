@@ -247,7 +247,7 @@ extends Erebot_Module_Base
             }
             else {
                 $timer = new Erebot_Timer(
-                    array($this, 'removeUser'),
+                    new Erebot_Callable(array($this, 'removeUser')),
                     $delay, FALSE, array($nick)
                 );
                 $this->addTimer($timer);
