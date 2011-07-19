@@ -19,11 +19,6 @@
 class   Erebot_Module_IrcTracker
 extends Erebot_Module_Base
 {
-    static protected $_metadata = array(
-        'requires'  =>  array(
-            'Erebot_Module_ServerCapabilities',
-        ),
-    );
     protected $_nicks;
     protected $_chans;
     protected $_hasUHNAMES;
@@ -52,18 +47,21 @@ extends Erebot_Module_Base
         }
 
         if ($flags & self::RELOAD_HANDLERS) {
+            // Handles some user changing his nickname.
             $handler = new Erebot_EventHandler(
                 array($this, 'handleNick'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Nick')
             );
             $this->_connection->addEventHandler($handler);
 
+            // Handles some user joining a channel the bot is on.
             $handler = new Erebot_EventHandler(
                 array($this, 'handleJoin'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Join')
             );
             $this->_connection->addEventHandler($handler);
 
+            // Handles some user leaving a channel (for various reasons).
             $handler = new Erebot_EventHandler(
                 array($this, 'handleLeaving'),
                 new Erebot_Event_Match_Any(
@@ -74,12 +72,14 @@ extends Erebot_Module_Base
             );
             $this->_connection->addEventHandler($handler);
 
+            // Handles possible extensions.
             $handler = new Erebot_EventHandler(
                 array($this, 'handleCapabilities'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Event_ServerCapabilities')
             );
             $this->_connection->addEventHandler($handler);
 
+            // Handles information received when the bot joins a channel.
             $raw = new Erebot_RawHandler(
                 array($this, 'handleNames'),
                 $this->getRawRef('RPL_NAMEREPLY')
@@ -92,6 +92,7 @@ extends Erebot_Module_Base
             );
             $this->_connection->addRawHandler($raw);
 
+            // Handles modes given/taken to/from users on IRC channels.
             $handler = new Erebot_EventHandler(
                 array($this, 'handleChanModeAddition'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Base_ChanModeGiven')
@@ -101,6 +102,13 @@ extends Erebot_Module_Base
             $handler = new Erebot_EventHandler(
                 array($this, 'handleChanModeRemoval'),
                 new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Base_ChanModeTaken')
+            );
+            $this->_connection->addEventHandler($handler);
+
+            // Handles users on the WATCH list (see also the WatchList module).
+            $handler = new Erebot_EventHandler(
+                array($this, 'handleNotification'),
+                new Erebot_Event_Match_InstanceOf('Erebot_Event_NotificationAbstract')
             );
             $this->_connection->addEventHandler($handler);
         }
@@ -175,6 +183,22 @@ extends Erebot_Module_Base
     public function removeUser(Erebot_Interface_Timer $timer, $nick)
     {
         $this->_removeUser($nick);
+    }
+
+    public function handleNotification(Erebot_Interface_Event_Base_Source $event)
+    {
+        $user = $event->getSource();
+        if ($event instanceof Erebot_Interface_Event_Notify) {
+            return $this->_updateUser(
+                $user->getNick(),
+                $user->getIdent(),
+                $user->getHost()
+            );
+        }
+
+        if ($event instanceof Erebot_Interface_Event_UnNotify) {
+            return $this->_removeUser($user->getNick());
+        }
     }
 
     public function handleNick(Erebot_Interface_Event_Nick $event)
