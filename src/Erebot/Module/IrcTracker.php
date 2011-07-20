@@ -199,7 +199,10 @@ extends Erebot_Module_Base
         $this->_removeUser($nick);
     }
 
-    public function handleNotification(Erebot_Interface_Event_Base_Source $event)
+    public function handleNotification(
+        Erebot_Interface_EventHandler       $handler,
+        Erebot_Interface_Event_Base_Source  $event
+    )
     {
         $user = $event->getSource();
         if ($event instanceof Erebot_Interface_Event_Notify) {
@@ -215,7 +218,10 @@ extends Erebot_Module_Base
         }
     }
 
-    public function handleNick(Erebot_Interface_Event_Nick $event)
+    public function handleNick(
+        Erebot_Interface_EventHandler   $handler,
+        Erebot_Interface_Event_Nick     $event
+    )
     {
         $oldNick    = (string) $event->getSource();
         $newNick    = (string) $event->getTarget();
@@ -231,7 +237,10 @@ extends Erebot_Module_Base
         $this->_IAL[$key]['nick']   = $newNick;
     }
 
-    public function handleLeaving(Erebot_Interface_Event_Base_Generic $event)
+    public function handleLeaving(
+        Erebot_Interface_EventHandler       $handler,
+        Erebot_Interface_Event_Base_Generic $event
+    )
     {
         if ($event instanceof Erebot_Event_Kick)
             $nick = (string) $event->getTarget();
@@ -269,7 +278,10 @@ extends Erebot_Module_Base
         }
     }
 
-    public function handleCapabilities(Erebot_Event_ServerCapabilities $event)
+    public function handleCapabilities(
+        Erebot_Interface_EventHandler   $handler,
+        Erebot_Event_ServerCapabilities $event
+    )
     {
         $module = $event->getModule();
         if ($module->hasExtendedNames())
@@ -280,7 +292,10 @@ extends Erebot_Module_Base
         }
     }
 
-    public function handleNames(Erebot_Interface_Event_Raw $raw)
+    public function handleNames(
+        Erebot_Interface_RawHandler $handler,
+        Erebot_Interface_Event_Raw  $raw
+    )
     {
         $text   = $raw->getText();
         $chan   = $text[1];
@@ -330,13 +345,19 @@ extends Erebot_Module_Base
         }
     }
 
-    public function handleWho(Erebot_Interface_Event_Raw $raw)
+    public function handleWho(
+        Erebot_Interface_RawHandler $handler,
+        Erebot_Interface_Event_Raw  $raw
+    )
     {
         $text = $raw->getText();
         $this->_updateUser($text[4], $text[1], $text[2]);
     }
 
-    public function handleJoin(Erebot_Interface_Event_Join $event)
+    public function handleJoin(
+        Erebot_Interface_EventHandler   $handler,
+        Erebot_Interface_Event_Join     $event
+    )
     {
         $user       = $event->getSource();
         $nick       = $user->getNick();
@@ -351,7 +372,10 @@ extends Erebot_Module_Base
         $this->_chans[$event->getChan()][$key] = array();
     }
 
-    public function handleChanModeAddition(Erebot_Interface_Event_Base_ChanModeGiven $event)
+    public function handleChanModeAddition(
+        Erebot_Interface_EventHandler               $handler,
+        Erebot_Interface_Event_Base_ChanModeGiven   $event
+    )
     {
         $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
@@ -364,7 +388,10 @@ extends Erebot_Module_Base
             Erebot_Utils::getVStatic($event, 'MODE_LETTER');
     }
 
-    public function handleChanModeRemoval(Erebot_Interface_Event_Base_ChanModeTaken $event)
+    public function handleChanModeRemoval(
+        Erebot_Interface_EventHandler               $handler,
+        Erebot_Interface_Event_Base_ChanModeTaken   $event
+    )
     {
         $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
