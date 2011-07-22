@@ -46,7 +46,7 @@ extends ErebotModuleTestCase
             '#test',
             'foo!ident@host'
         );
-        $this->_module->handleJoin($event);
+        $this->_module->handleJoin($this->_eventHandler, $event);
     }
 
     public function tearDown()
@@ -69,15 +69,15 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Nick($this->_connection, 'foo', 'bar');
-        $this->_module->handleNick($event);
+        $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("bar", (string) $token);
 
         $event = new Erebot_Event_Nick($this->_connection, 'foo', 'qux');
-        $this->_module->handleNick($event);
+        $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("bar", (string) $token);
 
         $event = new Erebot_Event_Nick($this->_connection, 'bar', 'baz');
-        $this->_module->handleNick($event);
+        $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("baz", (string) $token);
     }
 
@@ -87,7 +87,7 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Kick($this->_connection, '#test', 'bar', 'foo', 'Doh!');
-        $this->_module->handleLeaving($event);
+        $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }
 
@@ -97,7 +97,7 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Part($this->_connection, '#test', 'foo', 'Doh!');
-        $this->_module->handleLeaving($event);
+        $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }
 
@@ -107,7 +107,7 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = new Erebot_Event_Quit($this->_connection, 'foo', 'Doh!');
-        $this->_module->handleLeaving($event);
+        $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }
 
@@ -132,13 +132,13 @@ extends ErebotModuleTestCase
                 '#test',
                 $user.'!ident@host'
             );
-            $this->_module->handleJoin($event);
+            $this->_module->handleJoin($this->_eventHandler, $event);
 
             $event = new $cls(
                 $this->_connection,
                 '#test', 'foo', $user
             );
-            $this->_module->handleChanModeAddition($event);
+            $this->_module->handleChanModeAddition($this->_eventHandler, $event);
         }
 
         foreach ($users as $user => $cls) {
@@ -167,7 +167,7 @@ extends ErebotModuleTestCase
             $this->_connection,
             '#test', 'foo', 'q'
         );
-        $this->_module->handleChanModeAddition($event);
+        $this->_module->handleChanModeAddition($this->_eventHandler, $event);
 
         // We expect only "q" to be returned
         // as it is now +qa.

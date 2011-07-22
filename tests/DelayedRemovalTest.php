@@ -55,14 +55,14 @@ extends ErebotModuleTestCase
             '#test',
             'attacker!evil@guy'
         );
-        $this->_module->handleJoin($event);
+        $this->_module->handleJoin($this->_eventHandler, $event);
 
         $event = new Erebot_Event_Join(
             $this->_connection,
             '#test',
             'foo!ident@host'
         );
-        $this->_module->handleJoin($event);
+        $this->_module->handleJoin($this->_eventHandler, $event);
 
         $this->_token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertEquals("foo", (string) $this->_token);
@@ -72,7 +72,7 @@ extends ErebotModuleTestCase
             'foo!ident@host',
             'Quit message'
         );
-        $this->_module->handleLeaving($event);
+        $this->_module->handleLeaving($this->_eventHandler, $event);
 
         // The token must not have been invalidated yet.
         $this->assertEquals("foo", (string) $this->_token);
@@ -112,7 +112,7 @@ extends ErebotModuleTestCase
             '#test',
             'foo!ident@host'
         );
-        $this->_module->handleJoin($event);
+        $this->_module->handleJoin($this->_eventHandler, $event);
 
         // The token must have the same reference.
         $token = $this->_module->startTracking('foo', 'TestToken');
@@ -132,7 +132,7 @@ extends ErebotModuleTestCase
             'attacker',
             'foo'
         );
-        $this->_module->handleNick($event);
+        $this->_module->handleNick($this->_eventHandler, $event);
 
         // The token must have different references.
         $token = $this->_module->startTracking('foo', 'TestToken');
@@ -153,7 +153,7 @@ extends ErebotModuleTestCase
             '#test',
             'foo!evil@guy'
         );
-        $this->_module->handleJoin($event);
+        $this->_module->handleJoin($this->_eventHandler, $event);
 
         // The token must have different references.
         $token = $this->_module->startTracking('foo', 'TestToken');
