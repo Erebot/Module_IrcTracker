@@ -22,7 +22,7 @@ extends Erebot_Module_Base
     protected $_nicks;
     protected $_chans;
     protected $_hasUHNAMES;
-    protected $_IAL;
+    protected $_ial;
     protected $_sequence;
 
     const INFO_NICK     = 'Nick';
@@ -39,7 +39,7 @@ extends Erebot_Module_Base
         if ($flags & self::RELOAD_MEMBERS) {
             if ($flags & self::RELOAD_INIT) {
                 $this->_chans       = array();
-                $this->_IAL         = array();
+                $this->_ial         = array();
                 $this->_hasUHNAMES  = FALSE;
                 $this->_nicks       = array();
                 $this->_sequence    = 0;
@@ -130,7 +130,7 @@ extends Erebot_Module_Base
 
     protected function _unload()
     {
-        foreach ($this->_IAL as $entry) {
+        foreach ($this->_ial as $entry) {
             if (isset($entry['TIMER']))
                 $this->removeTimer($entry['TIMER']);
         }
@@ -145,11 +145,11 @@ extends Erebot_Module_Base
             $this->_nicks[$key] = $normNick;
         }
 
-        if (isset($this->_IAL[$key]['TIMER']))
-            $this->removeTimer($this->_IAL[$key]['TIMER']);
+        if (isset($this->_ial[$key]['TIMER']))
+            $this->removeTimer($this->_ial[$key]['TIMER']);
 
-        if (!isset($this->_IAL[$key]) || $this->_IAL[$key]['ident'] === NULL) {
-            $this->_IAL[$key] = array(
+        if (!isset($this->_ial[$key]) || $this->_ial[$key]['ident'] === NULL) {
+            $this->_ial[$key] = array(
                 'nick'  => $nick,
                 'ident' => $ident,
                 'host'  => $host,
@@ -160,15 +160,15 @@ extends Erebot_Module_Base
         }
 
         if ($ident !== NULL) {
-            if ($this->_IAL[$key]['ident'] != $ident ||
-                $this->_IAL[$key]['host'] != $host) {
+            if ($this->_ial[$key]['ident'] != $ident ||
+                $this->_ial[$key]['host'] != $host) {
                 unset($this->_nicks[$key]);
-                unset($this->_IAL[$key]);
+                unset($this->_ial[$key]);
                 $key = $this->_sequence++;
                 $this->_nicks[$key] = $normNick;
             }
 
-            $this->_IAL[$key] = array(
+            $this->_ial[$key] = array(
                 'nick'  => $nick,
                 'ident' => $ident,
                 'host'  => $host,
@@ -186,12 +186,12 @@ extends Erebot_Module_Base
         if ($key === FALSE)
             return;
 
-        $this->_IAL[$key]['TIMER'] = NULL;
+        $this->_ial[$key]['TIMER'] = NULL;
         if (!isset($this->_nicks[$key]) || count($this->getCommonChans($nick)))
             return;
 
         unset($this->_nicks[$key]);
-        unset($this->_IAL[$key]);
+        unset($this->_ial[$key]);
     }
 
     public function removeUser(Erebot_Interface_Timer $timer, $nick)
@@ -234,7 +234,7 @@ extends Erebot_Module_Base
 
         $this->_removeUser($normNewNick);
         $this->_nicks[$key]         = $normNewNick;
-        $this->_IAL[$key]['nick']   = $newNick;
+        $this->_ial[$key]['nick']   = $newNick;
     }
 
     public function handleLeaving(
@@ -260,7 +260,7 @@ extends Erebot_Module_Base
             unset($this->_chans[$event->getChan()][$key]);
 
         if (!count($this->getCommonChans($nick))) {
-            $this->_IAL[$key]['ison'] = FALSE;
+            $this->_ial[$key]['ison'] = FALSE;
             $delay = $this->parseInt('expire_delay', 60);
             if ($delay < 0)
                 $delay = 0;
@@ -331,7 +331,8 @@ extends Erebot_Module_Base
             if ($user === FALSE)
                 continue;
 
-            $identity   = new Erebot_Identity($user);
+            $identityCls = $this->getFactory('!Identity');
+            $identity   = new $identityCls($user);
             $nick       = $identity->getNick();
             $normNick   = $this->_connection->normalizeNick($nick);
 
@@ -400,19 +401,23 @@ extends Erebot_Module_Base
         if ($key === FALSE)
             return;
 
-        $key2 = array_search(
+        $modeIndex = array_search(
             Erebot_Utils::getVStatic($event, 'MODE_LETTER'),
             $this->_chans[$event->getChan()][$key]
         );
-        if ($key2 === FALSE)
+        if ($modeIndex === FALSE)
             return;
 
-        unset($this->_chans[$event->getChan()][$key][$key2]);
+        unset($this->_chans[$event->getChan()][$key][$modeIndex]);
     }
 
-    public function startTracking($nick, $cls = 'Erebot_Module_IrcTracker_Token')
+    public function startTracking(
+        $nick,
+        $cls    = 'Erebot_Module_IrcTracker_Token'
+    )
     {
-        if ($nick instanceof Erebot_Identity)
+        $identityCls = $this->getFactory('!Identity');
+        if ($nick instanceof $identityCls)
             $identity = $nick;
         else {
             if (!is_string($nick)) {
@@ -421,7 +426,7 @@ extends Erebot_Module_Base
                     $translator->gettext('Not a valid nick')
                 );
             }
-            $identity = new Erebot_Identity($nick);
+            $identity = new $identityCls($nick);
         }
 
         $nick   = $this->_connection->normalizeNick($identity->getNick());
@@ -463,7 +468,7 @@ extends Erebot_Module_Base
             }
         }
 
-        if (!isset($this->_IAL[$token])) {
+        if (!isset($this->_ial[$token])) {
             throw new Erebot_NotFoundException(
                 $translator->gettext('No such token')
             );
@@ -471,19 +476,19 @@ extends Erebot_Module_Base
 
         $info = strtolower($info);
         if ($info == 'mask') {
-            if ($this->_IAL[$token]['ident'] === NULL)
-                return $this->_IAL[$token]['nick'].'!*@*';
-            return  $this->_IAL[$token]['nick'].'!'.
-                    $this->_IAL[$token]['ident'].'@'.
-                    $this->_IAL[$token]['host'];
+            if ($this->_ial[$token]['ident'] === NULL)
+                return $this->_ial[$token]['nick'].'!*@*';
+            return  $this->_ial[$token]['nick'].'!'.
+                    $this->_ial[$token]['ident'].'@'.
+                    $this->_ial[$token]['host'];
         }
 
-        if (!array_key_exists($info, $this->_IAL[$token])) {
+        if (!array_key_exists($info, $this->_ial[$token])) {
             throw new Erebot_InvalidValueException(
                 $translator->gettext('No such information')
             );
         }
-        return $this->_IAL[$token][$info];
+        return $this->_ial[$token][$info];
     }
 
     public function isOn($chan, $nick = NULL)
@@ -538,7 +543,7 @@ extends Erebot_Module_Base
 
             // Search only matching users on that channel.
             foreach (array_keys($this->_chans[$chan]) as $key) {
-                $entry  = $this->_IAL[$key];
+                $entry  = $this->_ial[$key];
                 $full   = $entry['nick'].'!'.$entry['ident'].'@'.$entry['host'];
                 if (preg_match($pattern, $full) == 1)
                     $results[] = $full;
@@ -546,7 +551,7 @@ extends Erebot_Module_Base
             return $results;
         }
 
-        foreach ($this->_IAL as $entry) {
+        foreach ($this->_ial as $entry) {
             $full = $entry['nick'].'!'.$entry['ident'].'@'.$entry['host'];
             if (preg_match($pattern, $full) == 1)
                 $results[] = $full;

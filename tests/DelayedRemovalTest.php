@@ -16,12 +16,6 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once(
-    dirname(__FILE__) .
-    DIRECTORY_SEPARATOR . 'testenv' .
-    DIRECTORY_SEPARATOR . 'bootstrap.php'
-);
-
 class   TestToken
 extends Erebot_Module_IrcTracker_Token
 {
@@ -34,6 +28,45 @@ extends Erebot_Module_IrcTracker_Token
 class   DelayedRemovalTest
 extends ErebotModuleTestCase
 {
+    protected function _mockJoin($nick, $ident, $host)
+    {
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Join',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $identity = $this->getMock(
+            'Erebot_Interface_Identity',
+            array(), array(), '', FALSE, FALSE
+        );
+        $identity
+            ->expects($this->any())
+            ->method('getNick')
+            ->will($this->returnValue($nick));
+        $identity
+            ->expects($this->any())
+            ->method('getIdent')
+            ->will($this->returnValue($ident));
+        $identity
+            ->expects($this->any())
+            ->method('getHost')
+            ->will($this->returnValue($host));
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getChan')
+            ->will($this->returnValue('#test'));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue($identity));
+        return $event;
+    }
+
     public function setUp()
     {
         parent::setUp();
@@ -46,32 +79,34 @@ extends ErebotModuleTestCase
         $this->_module = new Erebot_Module_IrcTracker(NULL);
         $this->_module->reload(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_ALL |
-            Erebot_Module_Base::RELOAD_INIT
+            Erebot_Module_Base::RELOAD_MEMBERS
         );
 
-        $event = new Erebot_Event_Join(
-            $this->_connection,
-            '#test',
-            'attacker!evil@guy'
-        );
+        $event = $this->_mockJoin('attacker', 'evil', 'guy');
         $this->_module->handleJoin($this->_eventHandler, $event);
 
-        $event = new Erebot_Event_Join(
-            $this->_connection,
-            '#test',
-            'foo!ident@host'
-        );
+        $event = $this->_mockJoin('foo', 'ident', 'host');
         $this->_module->handleJoin($this->_eventHandler, $event);
 
         $this->_token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertEquals("foo", (string) $this->_token);
 
-        $event = new Erebot_Event_Quit(
-            $this->_connection,
-            'foo!ident@host',
-            'Quit message'
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Join',
+            array(), array(), '', FALSE, FALSE
         );
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue('foo!ident@host'));
+        $event
+            ->expects($this->any())
+            ->method('getText')
+            ->will($this->returnValue('Quit message'));
         $this->_module->handleLeaving($this->_eventHandler, $event);
 
         // The token must not have been invalidated yet.
@@ -89,14 +124,11 @@ extends ErebotModuleTestCase
     public function testDelayedRemoval()
     {
         // Simulate the timer going off.
-        $this->_module->removeUser(
-            new Erebot_Timer(
-                new Erebot_Callable(array($this->_module, 'removeUser')),
-                60,
-                FALSE
-            ),
-            'foo'
+        $event = $this->getMock(
+            'Erebot_Interface_Timer',
+            array(), array(), '', FALSE, FALSE
         );
+        $this->_module->removeUser($timer, 'foo');
 
         // "foo" should have been wiped out.
         $this->assertEquals("???", (string) $this->_token);
@@ -107,11 +139,7 @@ extends ErebotModuleTestCase
         $this->assertEquals('foo!ident@host', $this->_token->getMask());
 
         // Same "foo" reconnects.
-        $event = new Erebot_Event_Join(
-            $this->_connection,
-            '#test',
-            'foo!ident@host'
-        );
+        $event = $this->_mockJoin('foo', 'ident', 'host');
         $this->_module->handleJoin($this->_eventHandler, $event);
 
         // The token must have the same reference.
@@ -123,7 +151,7 @@ extends ErebotModuleTestCase
 
     public function testHijackByNick()
     {
-        $this->assertEquals('foo!ident@host', $this->_token->getMask());
+        $this->assertEquals('foo', 'ident', 'host', $this->_token->getMask());
 
         // Attacker tries to hijack foo's identity
         // by changing his nick into "foo".
@@ -148,11 +176,7 @@ extends ErebotModuleTestCase
         $this->assertEquals('foo!ident@host', $this->_token->getMask());
 
         // Attacker reconnects as "foo".
-        $event = new Erebot_Event_Join(
-            $this->_connection,
-            '#test',
-            'foo!evil@guy'
-        );
+        $event = $this->_mockJoin('foo', 'evil', 'guy');
         $this->_module->handleJoin($this->_eventHandler, $event);
 
         // The token must have different references.

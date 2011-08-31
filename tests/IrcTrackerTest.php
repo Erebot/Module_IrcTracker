@@ -16,12 +16,6 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once(
-    dirname(__FILE__) .
-    DIRECTORY_SEPARATOR . 'testenv' .
-    DIRECTORY_SEPARATOR . 'bootstrap.php'
-);
-
 class   IrcTrackerTest
 extends ErebotModuleTestCase
 {
@@ -37,15 +31,42 @@ extends ErebotModuleTestCase
         $this->_module = new Erebot_Module_IrcTracker(NULL);
         $this->_module->reload(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_ALL |
-            Erebot_Module_Base::RELOAD_INIT
+            Erebot_Module_Base::RELOAD_MEMBERS
         );
 
-        $event = new Erebot_Event_Join(
-            $this->_connection,
-            '#test',
-            'foo!ident@host'
+        $identity = $this->getMock(
+            'Erebot_Interface_Identity',
+            array(), array(), '', FALSE, FALSE
         );
+        $identity
+            ->expects($this->any())
+            ->method('getNick')
+            ->will($this->returnValue('foo'));
+        $identity
+            ->expects($this->any())
+            ->method('getIdent')
+            ->will($this->returnValue('ident'));
+        $identity
+            ->expects($this->any())
+            ->method('getHost')
+            ->will($this->returnValue('host'));
+
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Join',
+            array(), array(), '', FALSE, FALSE
+        );
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getChan')
+            ->will($this->returnValue('#test'));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue($identity));
         $this->_module->handleJoin($this->_eventHandler, $event);
     }
 
@@ -114,11 +135,11 @@ extends ErebotModuleTestCase
     public function testByChannelModes()
     {
         $users = array(
-            'q' => 'Erebot_Event_Owner',
-            'a' => 'Erebot_Event_Protect',
-            'o' => 'Erebot_Event_Op',
-            'h' => 'Erebot_Event_Halfop',
-            'v' => 'Erebot_Event_Voice',
+            'q' => 'Erebot_Interface_Event_Owner',
+            'a' => 'Erebot_Interface_Event_Protect',
+            'o' => 'Erebot_Interface_Event_Op',
+            'h' => 'Erebot_Interface_Event_Halfop',
+            'v' => 'Erebot_Interface_Event_Voice',
             'foo'   => FALSE,
         );
 
@@ -127,17 +148,62 @@ extends ErebotModuleTestCase
             if ($cls === FALSE)
                 continue;
 
-            $event = new Erebot_Event_Join(
-                $this->_connection,
-                '#test',
-                $user.'!ident@host'
+            $identity = $this->getMock(
+                'Erebot_Interface_Identity',
+                array(), array(), '', FALSE, FALSE
             );
+            $identity
+                ->expects($this->any())
+                ->method('getNick')
+                ->will($this->returnValue($user));
+            $identity
+                ->expects($this->any())
+                ->method('getIdent')
+                ->will($this->returnValue('ident'));
+            $identity
+                ->expects($this->any())
+                ->method('getHost')
+                ->will($this->returnValue('host'));
+
+            $event = $this->getMock(
+                'Erebot_Interface_Event_Join',
+                array(), array(), '', FALSE, FALSE
+            );
+            $event
+                ->expects($this->any())
+                ->method('getConnection')
+                ->will($this->returnValue($this->_connection));
+            $event
+                ->expects($this->any())
+                ->method('getChan')
+                ->will($this->returnValue('#test'));
+            $event
+                ->expects($this->any())
+                ->method('getSource')
+                ->will($this->returnValue($identity));
+
             $this->_module->handleJoin($this->_eventHandler, $event);
 
-            $event = new $cls(
-                $this->_connection,
-                '#test', 'foo', $user
+            $event = $this->getMock(
+                $cls,
+                array(), array(), '', FALSE, FALSE
             );
+            $event
+                ->expects($this->any())
+                ->method('getConnection')
+                ->will($this->returnValue($this->_connection));
+            $event
+                ->expects($this->any())
+                ->method('getChan')
+                ->will($this->returnValue('#test'));
+            $event
+                ->expects($this->any())
+                ->method('getSource')
+                ->will($this->returnValue('foo'));
+            $event
+                ->expects($this->any())
+                ->method('getTarget')
+                ->will($this->returnValue($user));
             $this->_module->handleChanModeAddition($this->_eventHandler, $event);
         }
 
@@ -163,10 +229,26 @@ extends ErebotModuleTestCase
         }
 
         // Protect "q".
-        $event = new Erebot_Event_Protect(
-            $this->_connection,
-            '#test', 'foo', 'q'
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Protect',
+            array(), array(), '', FALSE, FALSE
         );
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getChan')
+            ->will($this->returnValue('#test'));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue('foo'));
+        $event
+            ->expects($this->any())
+            ->method('getTarget')
+            ->will($this->returnValue('q'));
         $this->_module->handleChanModeAddition($this->_eventHandler, $event);
 
         // We expect only "q" to be returned

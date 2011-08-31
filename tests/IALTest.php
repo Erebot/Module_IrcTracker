@@ -16,12 +16,6 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once(
-    dirname(__FILE__) .
-    DIRECTORY_SEPARATOR . 'testenv' .
-    DIRECTORY_SEPARATOR . 'bootstrap.php'
-);
-
 class   TrackerHelper
 extends Erebot_Module_IrcTracker
 {
@@ -61,8 +55,7 @@ extends ErebotModuleTestCase
         $this->_module = new TrackerHelper(NULL);
         $this->_module->reload(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_ALL |
-            Erebot_Module_Base::RELOAD_INIT
+            Erebot_Module_Base::RELOAD_MEMBERS
         );
     }
 
