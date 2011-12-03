@@ -417,13 +417,13 @@ extends Erebot_Module_Base
     )
     {
         $identityCls = $this->getFactory('!Identity');
+        $fmt = $this->getFormatter(NULL);
         if ($nick instanceof $identityCls)
             $identity = $nick;
         else {
             if (!is_string($nick)) {
-                $translator = $this->getTranslator(NULL);
                 throw new Erebot_InvalidValueException(
-                    $translator->gettext('Not a valid nick')
+                    $fmt->_('Not a valid nick')
                 );
             }
             $identity = new $identityCls($nick);
@@ -432,11 +432,8 @@ extends Erebot_Module_Base
         $nick   = $this->_connection->normalizeNick($identity->getNick());
         $key    = array_search($nick, $this->_nicks);
 
-        if ($key === FALSE) {
-            throw new Erebot_NotFoundException(
-                $translator->gettext('No such user')
-            );
-        }
+        if ($key === FALSE)
+            throw new Erebot_NotFoundException($fmt->_('No such user'));
         return new $cls($this, $key);
     }
 
@@ -455,7 +452,7 @@ extends Erebot_Module_Base
             return call_user_func(array($token, $methods[$info]));
         }
 
-        $translator = $this->getTranslator(NULL);
+        $fmt = $this->getFormatter(NULL);
         if (is_string($token)) {
             $token = $this->_connection->normalizeNick(
                 Erebot_Utils::extractNick($token)
@@ -463,16 +460,13 @@ extends Erebot_Module_Base
             $token = array_search($token, $this->_nicks);
             if ($token === FALSE) {
                 throw new Erebot_NotFoundException(
-                    $translator->gettext('No such user')
+                    $fmt->_('No such user')
                 );
             }
         }
 
-        if (!isset($this->_ial[$token])) {
-            throw new Erebot_NotFoundException(
-                $translator->gettext('No such token')
-            );
-        }
+        if (!isset($this->_ial[$token]))
+            throw new Erebot_NotFoundException($fmt->_('No such token'));
 
         $info = strtolower($info);
         if ($info == 'mask') {
@@ -485,7 +479,7 @@ extends Erebot_Module_Base
 
         if (!array_key_exists($info, $this->_ial[$token])) {
             throw new Erebot_InvalidValueException(
-                $translator->gettext('No such information')
+                $fmt->_('No such information')
             );
         }
         return $this->_ial[$token][$info];
