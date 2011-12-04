@@ -242,7 +242,7 @@ extends Erebot_Module_Base
         Erebot_Interface_Event_Base_Generic $event
     )
     {
-        if ($event instanceof Erebot_Event_Kick)
+        if ($event instanceof Erebot_Interface_Event_Kick)
             $nick = (string) $event->getTarget();
         else
             $nick = (string) $event->getSource();
@@ -250,7 +250,7 @@ extends Erebot_Module_Base
         $nick   = $this->_connection->normalizeNick($nick);
         $key    = array_search($nick, $this->_nicks);
 
-        if ($event instanceof Erebot_Event_Quit) {
+        if ($event instanceof Erebot_Interface_Event_Quit) {
             foreach ($this->_chans as $chan => $data) {
                 if (isset($data[$key]))
                     unset($this->_chans[$chan][$key]);
@@ -269,9 +269,13 @@ extends Erebot_Module_Base
                 $this->_removeUser($nick);
             }
             else {
-                $timer = new Erebot_Timer(
-                    new Erebot_Callable(array($this, 'removeUser')),
-                    $delay, FALSE, array($nick)
+                $timerCls       = $this->getFactory('!Timer');
+                $callableCls    = $this->getFactory('!Callable');
+                $timer = new $timerCls(
+                    new $callableCls(array($this, 'removeUser')),
+                    $delay,
+                    FALSE,
+                    array($nick)
                 );
                 $this->addTimer($timer);
             }

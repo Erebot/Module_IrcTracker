@@ -26,7 +26,7 @@ extends Erebot_Module_IrcTracker
 
     public function getIAL()
     {
-        return $this->_IAL;
+        return $this->_ial;
     }
 
     public function getChans()
@@ -41,10 +41,11 @@ extends Erebot_Module_IrcTracker
 }
 
 class   IALTest
-extends ErebotModuleTestCase
+extends Erebot_Testenv_Module_TestCase
 {
     public function setUp()
     {
+        $this->_module = new TrackerHelper(NULL);
         parent::setUp();
 
         $this->_networkConfig
@@ -52,7 +53,6 @@ extends ErebotModuleTestCase
             ->method('parseInt')
             ->will($this->returnValue(0));
 
-        $this->_module = new TrackerHelper(NULL);
         $this->_module->reload(
             $this->_connection,
             Erebot_Module_Base::RELOAD_MEMBERS

@@ -17,10 +17,33 @@
 */
 
 class   IrcTrackerTest
-extends ErebotModuleTestCase
+extends Erebot_Testenv_Module_TestCase
 {
+    protected function _mockNick($oldnick, $newnick)
+    {
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Nick',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue($oldnick));
+        $event
+            ->expects($this->any())
+            ->method('getTarget')
+            ->will($this->returnValue($newnick));
+        return $event;
+    }
+
     public function setUp()
     {
+        $this->_module = new Erebot_Module_IrcTracker(NULL);
         parent::setUp();
 
         $this->_networkConfig
@@ -28,7 +51,6 @@ extends ErebotModuleTestCase
             ->method('parseInt')
             ->will($this->returnValue(0));
 
-        $this->_module = new Erebot_Module_IrcTracker(NULL);
         $this->_module->reload(
             $this->_connection,
             Erebot_Module_Base::RELOAD_MEMBERS
@@ -89,15 +111,15 @@ extends ErebotModuleTestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = new Erebot_Event_Nick($this->_connection, 'foo', 'bar');
+        $event = $this->_mockNick('foo', 'bar');
         $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("bar", (string) $token);
 
-        $event = new Erebot_Event_Nick($this->_connection, 'foo', 'qux');
+        $event = $this->_mockNick('foo', 'qux');
         $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("bar", (string) $token);
 
-        $event = new Erebot_Event_Nick($this->_connection, 'bar', 'baz');
+        $event = $this->_mockNick('bar', 'baz');
         $this->_module->handleNick($this->_eventHandler, $event);
         $this->assertEquals("baz", (string) $token);
     }
@@ -107,7 +129,24 @@ extends ErebotModuleTestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = new Erebot_Event_Kick($this->_connection, '#test', 'bar', 'foo', 'Doh!');
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Kick',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getTarget')
+            ->will($this->returnValue('foo'));
+        $event
+            ->expects($this->any())
+            ->method('getChan')
+            ->will($this->returnValue('#test'));
+
         $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }
@@ -117,7 +156,24 @@ extends ErebotModuleTestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = new Erebot_Event_Part($this->_connection, '#test', 'foo', 'Doh!');
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Part',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue('foo'));
+        $event
+            ->expects($this->any())
+            ->method('getChan')
+            ->will($this->returnValue('#test'));
+
         $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }
@@ -127,7 +183,20 @@ extends ErebotModuleTestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = new Erebot_Event_Quit($this->_connection, 'foo', 'Doh!');
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Quit',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue('foo'));
+
         $this->_module->handleLeaving($this->_eventHandler, $event);
         $this->assertEquals("???", (string) $token);
     }

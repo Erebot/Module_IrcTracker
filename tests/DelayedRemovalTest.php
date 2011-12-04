@@ -26,7 +26,7 @@ extends Erebot_Module_IrcTracker_Token
 }
 
 class   DelayedRemovalTest
-extends ErebotModuleTestCase
+extends Erebot_Testenv_Module_TestCase
 {
     protected function _mockJoin($nick, $ident, $host)
     {
@@ -69,14 +69,20 @@ extends ErebotModuleTestCase
 
     public function setUp()
     {
+        $this->_module = new Erebot_Module_IrcTracker(NULL);
         parent::setUp();
+
+        $timer = $this->getMock(
+            'Erebot_Interface_Timer',
+            array(), array(), '', FALSE, FALSE
+        );
+        $this->_module->setFactory('!Timer', get_class($timer));
 
         $this->_serverConfig
             ->expects($this->any())
             ->method('parseInt')
             ->will($this->returnValue(10));
 
-        $this->_module = new Erebot_Module_IrcTracker(NULL);
         $this->_module->reload(
             $this->_connection,
             Erebot_Module_Base::RELOAD_MEMBERS
@@ -92,7 +98,7 @@ extends ErebotModuleTestCase
         $this->assertEquals("foo", (string) $this->_token);
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Join',
+            'Erebot_Interface_Event_Quit',
             array(), array(), '', FALSE, FALSE
         );
         $event
@@ -102,11 +108,7 @@ extends ErebotModuleTestCase
         $event
             ->expects($this->any())
             ->method('getSource')
-            ->will($this->returnValue('foo!ident@host'));
-        $event
-            ->expects($this->any())
-            ->method('getText')
-            ->will($this->returnValue('Quit message'));
+            ->will($this->returnValue('foo'));
         $this->_module->handleLeaving($this->_eventHandler, $event);
 
         // The token must not have been invalidated yet.
@@ -124,7 +126,7 @@ extends ErebotModuleTestCase
     public function testDelayedRemoval()
     {
         // Simulate the timer going off.
-        $event = $this->getMock(
+        $timer = $this->getMock(
             'Erebot_Interface_Timer',
             array(), array(), '', FALSE, FALSE
         );
@@ -151,15 +153,28 @@ extends ErebotModuleTestCase
 
     public function testHijackByNick()
     {
-        $this->assertEquals('foo', 'ident', 'host', $this->_token->getMask());
+        $this->assertEquals('foo!ident@host', $this->_token->getMask());
 
         // Attacker tries to hijack foo's identity
         // by changing his nick into "foo".
-        $event = new Erebot_Event_Nick(
-            $this->_connection,
-            'attacker',
-            'foo'
+        $event = $this->getMock(
+            'Erebot_Interface_Event_Nick',
+            array(), array(), '', FALSE, FALSE
         );
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue('attacker'));
+        $event
+            ->expects($this->any())
+            ->method('getTarget')
+            ->will($this->returnValue('foo'));
+
         $this->_module->handleNick($this->_eventHandler, $event);
 
         // The token must have different references.
