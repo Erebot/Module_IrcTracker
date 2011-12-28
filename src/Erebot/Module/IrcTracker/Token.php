@@ -63,20 +63,22 @@ implements  Erebot_Interface_Identity
     }
 
     /// \copydoc Erebot_Interface_Identity::getHost()
-    public function getHost()
+    public function getHost($c10n)
     {
         return $this->_tracker->getInfo(
             $this->_token,
-            Erebot_Module_IrcTracker::INFO_HOST
+            Erebot_Module_IrcTracker::INFO_HOST,
+            array($c10n)
         );
     }
 
     /// \copydoc Erebot_Interface_Identity::getMask()
-    public function getMask()
+    public function getMask($c10n)
     {
         return $this->_tracker->getInfo(
             $this->_token,
-            Erebot_Module_IrcTracker::INFO_MASK
+            Erebot_Module_IrcTracker::INFO_MASK,
+            array($c10n)
         );
     }
 

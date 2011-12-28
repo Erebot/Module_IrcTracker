@@ -209,7 +209,7 @@ extends Erebot_Module_Base
             return $this->_updateUser(
                 $user->getNick(),
                 $user->getIdent(),
-                $user->getHost()
+                $user->getHost(Erebot_Interface_Identity::CANON_IPV6)
             );
         }
 
@@ -343,7 +343,7 @@ extends Erebot_Module_Base
             $this->_updateUser(
                 $nick,
                 $identity->getIdent(),
-                $identity->getHost()
+                $identity->getHost(Erebot_Interface_Identity::CANON_IPV6)
             );
             $key = array_search($normNick, $this->_nicks);
             $this->_chans[$chan][$key] = $modes;
@@ -371,7 +371,7 @@ extends Erebot_Module_Base
         $this->_updateUser(
             $nick,
             $user->getIdent(),
-            $user->getHost()
+            $user->getHost(Erebot_Interface_Identity::CANON_IPV6)
         );
         $key = array_search($normNick, $this->_nicks);
         $this->_chans[$event->getChan()][$key] = array();
@@ -441,7 +441,7 @@ extends Erebot_Module_Base
         return new $cls($this, $key);
     }
 
-    public function getInfo($token, $info)
+    public function getInfo($token, $info, $args = array())
     {
         if ($token instanceof Erebot_Module_IrcTracker_Token) {
             $methods = array(
@@ -453,7 +453,8 @@ extends Erebot_Module_Base
             );
             if (!isset($methods[$info]))
                 throw new Erebot_InvalidValueException('No such information');
-            return call_user_func(array($token, $methods[$info]));
+            array_unshift($args, $token, $methods[$info]);
+            return call_user_func($args);
         }
 
         $fmt = $this->getFormatter(NULL);

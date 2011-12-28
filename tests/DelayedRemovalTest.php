@@ -138,7 +138,10 @@ extends Erebot_Testenv_Module_TestCase
 
     public function testClientReconnection()
     {
-        $this->assertEquals('foo!ident@host', $this->_token->getMask());
+        $this->assertEquals(
+            'foo!ident@host',
+            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
 
         // Same "foo" reconnects.
         $event = $this->_mockJoin('foo', 'ident', 'host');
@@ -147,13 +150,22 @@ extends Erebot_Testenv_Module_TestCase
         // The token must have the same reference.
         $token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertEquals($this->_token->getToken(), $token->getToken());
-        $this->assertEquals('foo!ident@host', $token->getMask());
-        $this->assertEquals('foo!ident@host', $this->_token->getMask());
+        $this->assertEquals(
+            'foo!ident@host',
+            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
+        $this->assertEquals(
+            'foo!ident@host',
+            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
     }
 
     public function testHijackByNick()
     {
-        $this->assertEquals('foo!ident@host', $this->_token->getMask());
+        $this->assertEquals(
+            'foo!ident@host',
+            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
 
         // Attacker tries to hijack foo's identity
         // by changing his nick into "foo".
@@ -181,14 +193,20 @@ extends Erebot_Testenv_Module_TestCase
         $token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertNotEquals($this->_token->getToken(), $token->getToken());
         // The mask must reflect the difference.
-        $this->assertEquals('foo!evil@guy', $token->getMask());
+        $this->assertEquals(
+            'foo!evil@guy',
+            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
         // And the old token must have been invalidated.
         $this->assertEquals('???', (string) $this->_token);
     }
 
     public function testHijackByConnection()
     {
-        $this->assertEquals('foo!ident@host', $this->_token->getMask());
+        $this->assertEquals(
+            'foo!ident@host',
+            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
 
         // Attacker reconnects as "foo".
         $event = $this->_mockJoin('foo', 'evil', 'guy');
@@ -198,7 +216,10 @@ extends Erebot_Testenv_Module_TestCase
         $token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertNotEquals($this->_token->getToken(), $token->getToken());
         // The mask must reflect the difference.
-        $this->assertEquals('foo!evil@guy', $token->getMask());
+        $this->assertEquals(
+            'foo!evil@guy',
+            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+        );
         // And the old token must have been invalidated.
         $this->assertEquals('???', (string) $this->_token);
     }
