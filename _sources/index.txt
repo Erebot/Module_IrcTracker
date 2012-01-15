@@ -8,14 +8,16 @@ status on those channels, etc.
 This module can keep track of users across short disconnections using a set
 of timers and a smart algorithm that can detect nickname takeover attempts.
 
-
 Contents:
 
 ..  toctree::
     :maxdepth: 2
 
+    Description
+    Prerequisites
     generic/Installation
-
+    Configuration
+    Usage
 
 ..  _`Erebot`:
     https://www.erebot.net/
