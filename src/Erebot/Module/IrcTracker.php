@@ -16,21 +16,58 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * \brief
+ *      A module that keeps track of users which are
+ *      on the same IRC channels as the bot.
+ */
 class   Erebot_Module_IrcTracker
 extends Erebot_Module_Base
 {
+    /// Maps tokens to normalized nicknames.
     protected $_nicks;
+
+    /// Maps channels to a list of tokens for users present in that channel.
     protected $_chans;
+
+    /// Whether the IRC server supports the UHNAMES extension or not.
     protected $_hasUHNAMES;
+
+    /// Internal Address List, à la mIRC.
     protected $_ial;
+
+    /// Sequence number, incremented by 1 after each new token generation.
     protected $_sequence;
 
+
+    /// Return the current nickname for some user.
     const INFO_NICK     = 'Nick';
+
+    /// Return the current identity (in the IRC sense) for some user.
     const INFO_IDENT    = 'Ident';
+
+    /// Return the current hostname for some user.
     const INFO_HOST     = 'Host';
+
+    /// Return the current IRC mask for some user.
     const INFO_MASK     = 'Mask';
+
+    /// Return whether the given user is currently connected or not.
     const INFO_ISON     = 'IsOn';
 
+
+    /**
+     * This method is called whenever the module is (re)loaded.
+     *
+     * \param int $flags
+     *      A bitwise OR of the Erebot_Module_Base::RELOAD_*
+     *      constants. Your method should take proper actions
+     *      depending on the value of those flags.
+     *
+     * \note
+     *      See the documentation on individual RELOAD_*
+     *      constants for a list of possible values.
+     */
     public function _reload($flags)
     {
         if ($this->_channel !== NULL)
@@ -128,6 +165,9 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Frees the resources associated with this module.
+     */
     protected function _unload()
     {
         foreach ($this->_ial as $entry) {
@@ -136,6 +176,19 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Updates the IAL with new information on some user.
+     *
+     * \param string $nick
+     *      Some user's nickname whose IAL entry will
+     *      be updated.
+     *
+     * \param string $ident
+     *      Some user's identity, in the IRC sense of the term.
+     *
+     * \param string $host
+     *      Some user's hostname.
+     */
     protected function _updateUser($nick, $ident, $host)
     {
         $normNick   = $this->_connection->normalizeNick($nick);
@@ -178,6 +231,13 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Removes some user from the IAL.
+     *
+     * \param string $nick
+     *      Nickname of the user that is to be removed
+     *      from the IAL.
+     */
     protected function _removeUser($nick)
     {
         $nick   = $this->_connection->normalizeNick($nick);
@@ -194,11 +254,33 @@ extends Erebot_Module_Base
         unset($this->_ial[$key]);
     }
 
+    /**
+     * Removes some user from the IAL when the timer
+     * associated with their disconnection times out.
+     *
+     * \param Erebot_Interface_Timer $timer
+     *      Timer associated with the user's disconnection.
+     *
+     * \param string $nick
+     *      Nickname of the user to remove from the IAL.
+     */
     public function removeUser(Erebot_Interface_Timer $timer, $nick)
     {
         $this->_removeUser($nick);
     }
 
+    /**
+     * Handles a notification about some user
+     * (dis)connecting from/to the IRC network.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Base_Source $event
+     *      Notification.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleNotification(
         Erebot_Interface_EventHandler       $handler,
         Erebot_Interface_Event_Base_Source  $event
@@ -218,6 +300,17 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Handles a nick change.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Nick $event
+     *      Nick change event.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleNick(
         Erebot_Interface_EventHandler   $handler,
         Erebot_Interface_Event_Nick     $event
@@ -237,6 +330,19 @@ extends Erebot_Module_Base
         $this->_ial[$key]['nick']   = $newNick;
     }
 
+    /**
+     * Handles some user leaving an IRC channel.
+     * This may result from either a QUIT or KICK command.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Base_Generic $event
+     *      An event indicating that some user is leaving
+     *      an IRC channel the bot is on.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleLeaving(
         Erebot_Interface_EventHandler       $handler,
         Erebot_Interface_Event_Base_Generic $event
@@ -282,6 +388,19 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Handles server capabilities.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Event_ServerCapabilities $event
+     *      An event referencing a module that can determine
+     *      the IRC server's capabilities, such as
+     *      Erebot_Module_ServerCapabilities.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleCapabilities(
         Erebot_Interface_EventHandler   $handler,
         Erebot_Event_ServerCapabilities $event
@@ -296,6 +415,21 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Handles a list with the nicknames
+     * of all users in a given IRC channel.
+     *
+     * \param Erebot_Interface_RawHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Raw $raw
+     *      A raw event with the nicknames of users
+     *      in an IRC channel the bot just joined.
+     *      This is the same type of raw event as
+     *      when the NAMES command is issued.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleNames(
         Erebot_Interface_RawHandler $handler,
         Erebot_Interface_Event_Raw  $raw
@@ -350,6 +484,18 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Handles information about some user.
+     *
+     * \param Erebot_Interface_RawHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Raw $raw
+     *      Raw event containing some user's nickname,
+     *      IRC identity and hostname.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleWho(
         Erebot_Interface_RawHandler $handler,
         Erebot_Interface_Event_Raw  $raw
@@ -359,6 +505,19 @@ extends Erebot_Module_Base
         $this->_updateUser($text[4], $text[1], $text[2]);
     }
 
+    /**
+     * Handles some user joining an IRC channel
+     * the bot is currently on.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Join $event
+     *      Event indicating that some user joined
+     *      a channel the bot is on.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleJoin(
         Erebot_Interface_EventHandler   $handler,
         Erebot_Interface_Event_Join     $event
@@ -377,6 +536,20 @@ extends Erebot_Module_Base
         $this->_chans[$event->getChan()][$key] = array();
     }
 
+    /**
+     * Handles someone receiving a new status on an IRC channel,
+     * for example, when someone is OPped.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Base_ChanModeGiven $event
+     *      Event indicating someone's status changed
+     *      on an IRC channel the bot is currently on,
+     *      giving that person new privileges.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleChanModeAddition(
         Erebot_Interface_EventHandler               $handler,
         Erebot_Interface_Event_Base_ChanModeGiven   $event
@@ -393,6 +566,20 @@ extends Erebot_Module_Base
             Erebot_Utils::getVStatic($event, 'MODE_LETTER');
     }
 
+    /**
+     * Handles someone losing his status on an IRC channel,
+     * for example, when someone is DEOPped.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Base_ChanModeTaken $event
+     *      Event indicating someone's status changed
+     *      on an IRC channel the bot is currently on,
+     *      removing privileges from that person.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleChanModeRemoval(
         Erebot_Interface_EventHandler               $handler,
         Erebot_Interface_Event_Base_ChanModeTaken   $event
@@ -415,6 +602,26 @@ extends Erebot_Module_Base
         unset($this->_chans[$event->getChan()][$key][$modeIndex]);
     }
 
+    /**
+     * Returns a tracking token for some user.
+     *
+     * \param string $nick
+     *      The nickname of some user we want to start tracking.
+     *
+     * \param string $cls
+     *      (optional) Class to use to create the token.
+     *      Defaults to Erebot_Module_IrcTracker_Token.
+     *
+     * \retval mixed
+     *      A token that can later be used to return information
+     *      on that user (such as his/her nickname, IRC identity,
+     *      hostname and whether that person is still online or
+     *      not).
+     *
+     * \throw Erebot_NotFoundException
+     *      There is currently no user connected on an IRC channel
+     *      the bot is on matching the given nickname.
+     */
     public function startTracking(
         $nick,
         $cls    = 'Erebot_Module_IrcTracker_Token'
@@ -441,6 +648,47 @@ extends Erebot_Module_Base
         return new $cls($this, $key);
     }
 
+    /**
+     * Returns information about some user given a token
+     * associated with that user.
+     *
+     * \param opaque $token
+     *      Token associated with the user.
+     *
+     * \param opaque $info
+     *      The type of information we're interested in.
+     *      This is one of the INFO_* constants provided
+     *      by this class.
+     *
+     * \param array $args
+     *      (optional) Additional arguments for the query.
+     *      Defaults to an empty array. At present time,
+     *      this argument is only useful when you pass
+     *      one of Erebot_Module_IrcTracker::INFO_HOST or
+     *      Erebot_Module_IrcTracker::INFO_MASK as the
+     *      value for $info. In this case, you may pass an
+     *      array containing a boolean ($c10n) indicating
+     *      the type of hostname canonicalization to apply.
+     *      See also Erebot_Interface_Identity::getHost()
+     *      for more information on the $c10n parameter.
+     *
+     * \retval mixed
+     *      Requested information about that user.
+     *      This may be NULL if the requested information
+     *      has not been obtained yet.
+     *
+     * \throw Erebot_InvalidValueException
+     *      The value for $info is invalid.
+     *
+     * \throw Erebot_NotFoundException
+     *      The given $token does not match any known user.
+     *
+     * \warning
+     *      This method is not meant to be called directly.
+     *      Instead, you should call the equivalent methods
+     *      (getNick(), getHost(), etc.) from the token
+     *      returned by Erebot_Module_IrcTracker::startTracking().
+     */
     public function getInfo($token, $info, $args = array())
     {
         if ($token instanceof Erebot_Module_IrcTracker_Token) {
@@ -490,6 +738,24 @@ extends Erebot_Module_Base
         return $this->_ial[$token][$info];
     }
 
+    /**
+     * Indicates whether some user is present
+     * on a given IRC channel.
+     *
+     * \param string $chan
+     *      IRC channel that user must be on.
+     *
+     * \param mixed $nick
+     *      (optional) Either some user's nickname
+     *      (a string) or NULL. Defaults to NULL.
+     *      When this parameter is NULL, this method
+     *      tests whether the bot is on the given
+     *      IRC channel or not.
+     *
+     * \retval bool
+     *      TRUE is the given user is on that
+     *      IRC channel, FALSE otherwise.
+     */
     public function isOn($chan, $nick = NULL)
     {
         if ($nick === NULL)
@@ -503,6 +769,21 @@ extends Erebot_Module_Base
         return isset($this->_chans[$chan][$key]);
     }
 
+    /**
+     * Returns a list of IRC channels the bot and some
+     * other user have in common.
+     *
+     * \param string $nick
+     *      Nickname of the user for which we want to know
+     *      what channels (s)he shares with the bot.
+     *
+     * \retval list
+     *      A list with the names of all IRC channels
+     *      that user and the bot have in common.
+     *
+     * \throw Erebot_NotFoundException
+     *      The given nickname does not match any known user.
+     */
     public function getCommonChans($nick)
     {
         $nick   = Erebot_Utils::extractNick($nick);
@@ -519,6 +800,33 @@ extends Erebot_Module_Base
         return $results;
     }
 
+    /**
+     * Returns a list with the masks of all users
+     * that match a given (wildcard) mask and are
+     * on the given IRC channel.
+     *
+     * \param string $mask
+     *      A wildcard match to use to filter out
+     *      users (eg. "*!*@*.fr" to find all users
+     *      connected using a french ISP).
+     *
+     * \param mixed $chan
+     *      (optional) Only search for users that
+     *      have joined this IRC channel (given
+     *      by its name, as a string).
+     *      May also be set to NULL to search for
+     *      all users known to the bot, no matter
+     *      what channels they are currently on.
+     *      Defaults to NULL.
+     *
+     * \retval list
+     *      A list with the masks of all users
+     *      matching the given criteria.
+     *
+     * \throw Erebot_NotFoundException
+     *      The given channel name does not match
+     *      the name of any channel the bot is on.
+     */
     public function IAL($mask, $chan = NULL)
     {
         $results = array();
@@ -558,13 +866,60 @@ extends Erebot_Module_Base
         return $results;
     }
 
-    public function userPriviledges($chan, $nick)
+    /**
+     * Returns channel status associated
+     * with the given user.
+     * 
+     * \param string $chan
+     *      The IRC channel we're interested in.
+     *
+     * \param string $nick
+     *      Nickname of the user whose status on
+     *      the given channel we're interested in.
+     *
+     * \retval list
+     *      A list with the status/privileges
+     *      for that user on the given channel.
+     *      Each status is given by the letter
+     *      for the channel mode that refers to
+     *      it (eg. "o" for "operator status").
+     *
+     * \throw Erebot_NotFoundException
+     *      The given channel or nickname is not
+     *      not known to the bot.
+     */
+    public function userPrivileges($chan, $nick)
     {
         if (!isset($this->_chans[$chan][$nick]))
             throw new Erebot_NotFoundException('No such channel or user');
         return $this->_chans[$chan][$nick];
     }
 
+    /**
+     * Returns a list with the nicknames of all users
+     * that (do not) have some specific modes on them
+     * on some IRC channel.
+     *
+     * \param string $chan
+     *      The IRC channel we're interested in.
+     *
+     * \param array $modes
+     *      Only return those users that have these
+     *      statuses on the given IRC channel.
+     *
+     * \param bool $negate
+     *      Negate the search, ie. only return those
+     *      users that DO NOT have the given statuses
+     *      on the given IRC channel.
+     *
+     * \retval list
+     *      Nicknames of all users matching the given
+     *      criteria.
+     *
+     * \throw Erebot_NotFoundException
+     *      The bot is not present on the given IRC
+     *      channel and so the search cannot succeed.
+     */
     public function byChannelModes($chan, $modes, $negate = FALSE)
     {
         if (!isset($this->_chans[$chan]))

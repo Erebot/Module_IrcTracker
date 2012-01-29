@@ -44,7 +44,13 @@ implements  Erebot_Interface_Identity
         $this->_token   = $token;
     }
 
-    /// \copydoc Erebot_Interface_Identity::getNick()
+    /**
+     * Returns the nickname of the user
+     * represented by this identity.
+     *
+     * \retval mixed
+     *      This user's nickname or NULL if unavailable.
+     */
     public function getNick()
     {
         return $this->_tracker->getInfo(
@@ -53,7 +59,23 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    /// \copydoc Erebot_Interface_Identity::getIdent()
+    /**
+     * Returns the identity string of the user
+     * represented by this identity.
+     *
+     * \retval mixed
+     *      This user's identity string or NULL if unavailable.
+     *
+     * \note
+     *      The name of this method is somewhat misleading,
+     *      as it returns the "identity" as defined by the
+     *      user in his/her client.
+     *      This is not the same as the "identity" represented
+     *      here (which contains additional information).
+     *      To try to disambiguate, the term "identity string"
+     *      has been used when referring to the user-defined
+     *      identity. 
+     */
     public function getIdent()
     {
         return $this->_tracker->getInfo(
@@ -62,7 +84,18 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    /// \copydoc Erebot_Interface_Identity::getHost()
+    /**
+     * Returns the host of the user
+     * represented by this identity.
+     *
+     * \param opaque $c10n
+     *      Either Erebot_Interface_Identity::CANON_IPV4 or
+     *      Erebot_Interface_Identity::CANON_IPV6, indicating
+     *      the type of IP canonicalization to use.
+     *
+     * \retval string
+     *      This user's hostname or NULL if unavailable.
+     */
     public function getHost($c10n)
     {
         return $this->_tracker->getInfo(
@@ -72,7 +105,24 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    /// \copydoc Erebot_Interface_Identity::getMask()
+    /**
+     * Returns a mask which can later be used
+     * to match against this user.
+     *
+     * \param opaque $c10n
+     *      Either Erebot_Interface_Identity::CANON_IPV4 or
+     *      Erebot_Interface_Identity::CANON_IPV6, indicating
+     *      the type of IP canonicalization to use.
+     *
+     * \retval string
+     *      A mask matching against this user.
+     *
+     * \note
+     *      Fields for which no value is available should be
+     *      replaced with '*'. This can result in very generic
+     *      masks (eg. "foo!*@*") if not enough information
+     *      is known.
+     */
     public function getMask($c10n)
     {
         return $this->_tracker->getInfo(
@@ -98,7 +148,15 @@ implements  Erebot_Interface_Identity
         );
     }
 
-    /// \copydoc Erebot_Interface_Identity::__toString()
+    /**
+     * This method works like Erebot_Interface_Identity::getNick(),
+     * except that if no information is available on the user's
+     * nickname, it returns "???".
+     *
+     * \retval string
+     *      This user's nickname or a distinctive value
+     *      if it is not available.
+     */
     public function __toString()
     {
         try {
