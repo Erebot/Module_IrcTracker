@@ -18,7 +18,7 @@
 
 /**
  * An object meant to hold a token, which can subsequently
- * be used to retrieve information on the associated user.     
+ * be used to retrieve information on the associated user.
  */
 class       Erebot_Module_IrcTracker_Token
 implements  Erebot_Interface_Identity
@@ -74,7 +74,7 @@ implements  Erebot_Interface_Identity
      *      here (which contains additional information).
      *      To try to disambiguate, the term "identity string"
      *      has been used when referring to the user-defined
-     *      identity. 
+     *      identity.
      */
     public function getIdent()
     {
@@ -88,7 +88,7 @@ implements  Erebot_Interface_Identity
      * Returns the host of the user
      * represented by this identity.
      *
-     * \param opaque $c10n
+     * \param opaque $canonical
      *      Either Erebot_Interface_Identity::CANON_IPV4 or
      *      Erebot_Interface_Identity::CANON_IPV6, indicating
      *      the type of IP canonicalization to use.
@@ -96,12 +96,12 @@ implements  Erebot_Interface_Identity
      * \retval string
      *      This user's hostname or NULL if unavailable.
      */
-    public function getHost($c10n)
+    public function getHost($canonical)
     {
         return $this->_tracker->getInfo(
             $this->_token,
             Erebot_Module_IrcTracker::INFO_HOST,
-            array($c10n)
+            array($canonical)
         );
     }
 
@@ -109,7 +109,7 @@ implements  Erebot_Interface_Identity
      * Returns a mask which can later be used
      * to match against this user.
      *
-     * \param opaque $c10n
+     * \param opaque $canonical
      *      Either Erebot_Interface_Identity::CANON_IPV4 or
      *      Erebot_Interface_Identity::CANON_IPV6, indicating
      *      the type of IP canonicalization to use.
@@ -123,12 +123,12 @@ implements  Erebot_Interface_Identity
      *      masks (eg. "foo!*@*") if not enough information
      *      is known.
      */
-    public function getMask($c10n)
+    public function getMask($canonical)
     {
         return $this->_tracker->getInfo(
             $this->_token,
             Erebot_Module_IrcTracker::INFO_MASK,
-            array($c10n)
+            array($canonical)
         );
     }
 

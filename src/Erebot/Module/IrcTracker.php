@@ -263,6 +263,8 @@ extends Erebot_Module_Base
      *
      * \param string $nick
      *      Nickname of the user to remove from the IAL.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function removeUser(Erebot_Interface_Timer $timer, $nick)
     {
@@ -667,10 +669,10 @@ extends Erebot_Module_Base
      *      one of Erebot_Module_IrcTracker::INFO_HOST or
      *      Erebot_Module_IrcTracker::INFO_MASK as the
      *      value for $info. In this case, you may pass an
-     *      array containing a boolean ($c10n) indicating
+     *      array containing a boolean ($canonical) indicating
      *      the type of hostname canonicalization to apply.
      *      See also Erebot_Interface_Identity::getHost()
-     *      for more information on the $c10n parameter.
+     *      for more information on the $canonical parameter.
      *
      * \retval mixed
      *      Requested information about that user.
@@ -869,7 +871,7 @@ extends Erebot_Module_Base
     /**
      * Returns channel status associated
      * with the given user.
-     * 
+     *
      * \param string $chan
      *      The IRC channel we're interested in.
      *
@@ -926,6 +928,7 @@ extends Erebot_Module_Base
             throw new Erebot_NotFoundException('No such channel');
         if (!is_array($modes))
             $modes = array($modes);
+
         $results = array();
         $nbModes = count($modes);
         foreach ($this->_chans[$chan] as $key => $chmodes) {
