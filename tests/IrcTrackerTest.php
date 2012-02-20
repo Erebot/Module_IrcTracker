@@ -204,12 +204,12 @@ extends Erebot_Testenv_Module_TestCase
     public function testByChannelModes()
     {
         $users = array(
-            'q' => 'Erebot_Interface_Event_Owner',
-            'a' => 'Erebot_Interface_Event_Protect',
-            'o' => 'Erebot_Interface_Event_Op',
-            'h' => 'Erebot_Interface_Event_Halfop',
-            'v' => 'Erebot_Interface_Event_Voice',
-            'foo'   => FALSE,
+            'Q' => 'Erebot_Interface_Event_Owner',
+            'A' => 'Erebot_Interface_Event_Protect',
+            'O' => 'Erebot_Interface_Event_Op',
+            'H' => 'Erebot_Interface_Event_Halfop',
+            'V' => 'Erebot_Interface_Event_Voice',
+            'FOO'   => FALSE,
         );
 
         // Create a few users and give them some power.
@@ -281,19 +281,20 @@ extends Erebot_Testenv_Module_TestCase
             $expected = array_diff(array_keys($users), $modes);
             if ($cls === FALSE)
                 $modes = array();
+            $modes = array_map('strtolower', $modes);
 
             $received = $this->_module->byChannelModes('#test', $modes, TRUE);
             sort($expected);
             sort($received);
             $this->assertEquals(
                 $expected, $received,
-                "Negative search for '$user'"
+                "Negative search for '".strtolower($user)."'"
             );
 
             $this->assertEquals(
                 array($user),
                 $this->_module->byChannelModes('#test', $modes),
-                "Positive search for '$user'"
+                "Positive search for '".strtolower($user)."'"
             );
         }
 
@@ -324,13 +325,16 @@ extends Erebot_Testenv_Module_TestCase
         // as it is now +qa.
         $modes = array('q', 'a');
         $this->assertEquals(
-            array('q'),
+            array('Q'),
             $this->_module->byChannelModes('#test', $modes),
             "Positive search for multiple modes"
         );
 
         // We expect all users except those which are +q/+a.
-        $expected = array_diff(array_keys($users), $modes);
+        $expected = array_diff(
+            array_keys($users),
+            array_map('strtoupper', $modes)
+        );
         $received = $this->_module->byChannelModes('#test', $modes, TRUE);
         sort($expected);
         sort($received);

@@ -191,8 +191,9 @@ extends Erebot_Module_Base
      */
     protected function _updateUser($nick, $ident, $host)
     {
-        $normNick   = $this->_connection->normalizeNick($nick);
-        $key        = array_search($nick, $this->_nicks);
+        $collator   = $this->_connection->getCollator();
+        $normNick   = $collator->normalizeNick($nick);
+        $key        = array_search($normNick, $this->_nicks);
         if ($key === FALSE) {
             $key = $this->_sequence++;
             $this->_nicks[$key] = $normNick;
@@ -240,8 +241,9 @@ extends Erebot_Module_Base
      */
     protected function _removeUser($nick)
     {
-        $nick   = $this->_connection->normalizeNick($nick);
-        $key    = array_search($nick, $this->_nicks);
+        $collator   = $this->_connection->getCollator();
+        $nick       = $collator->normalizeNick($nick);
+        $key        = array_search($nick, $this->_nicks);
 
         if ($key === FALSE)
             return;
@@ -321,8 +323,9 @@ extends Erebot_Module_Base
         $oldNick    = (string) $event->getSource();
         $newNick    = (string) $event->getTarget();
 
-        $normOldNick = $this->_connection->normalizeNick($oldNick);
-        $normNewNick = $this->_connection->normalizeNick($newNick);
+        $collator       = $this->_connection->getCollator();
+        $normOldNick    = $collator->normalizeNick($oldNick);
+        $normNewNick    = $collator->normalizeNick($newNick);
         $key = array_search($normOldNick, $this->_nicks);
         if ($key === FALSE)
             return;
@@ -355,8 +358,9 @@ extends Erebot_Module_Base
         else
             $nick = (string) $event->getSource();
 
-        $nick   = $this->_connection->normalizeNick($nick);
-        $key    = array_search($nick, $this->_nicks);
+        $collator   = $this->_connection->getCollator();
+        $nick       = $collator->normalizeNick($nick);
+        $key        = array_search($nick, $this->_nicks);
 
         if ($event instanceof Erebot_Interface_Event_Quit) {
             foreach ($this->_chans as $chan => $data) {
@@ -474,7 +478,8 @@ extends Erebot_Module_Base
             $identityCls = $this->getFactory('!Identity');
             $identity   = new $identityCls($user);
             $nick       = $identity->getNick();
-            $normNick   = $this->_connection->normalizeNick($nick);
+            $collator   = $this->_connection->getCollator();
+            $normNick   = $collator->normalizeNick($nick);
 
             $this->_updateUser(
                 $nick,
@@ -527,7 +532,8 @@ extends Erebot_Module_Base
     {
         $user       = $event->getSource();
         $nick       = $user->getNick();
-        $normNick   = $this->_connection->normalizeNick($nick);
+        $collator   = $this->_connection->getCollator();
+        $normNick   = $collator->normalizeNick($nick);
 
         $this->_updateUser(
             $nick,
@@ -559,7 +565,8 @@ extends Erebot_Module_Base
     {
         $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
-        $normNick   = $this->_connection->normalizeNick($nick);
+        $collator   = $this->_connection->getCollator();
+        $normNick   = $collator->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
         if ($key === FALSE)
             return;
@@ -589,7 +596,8 @@ extends Erebot_Module_Base
     {
         $user       = $event->getTarget();
         $nick       = Erebot_Utils::extractNick($user);
-        $normNick   = $this->_connection->normalizeNick($nick);
+        $collator   = $this->_connection->getCollator();
+        $normNick   = $collator->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
         if ($key === FALSE)
             return;
@@ -642,8 +650,9 @@ extends Erebot_Module_Base
             $identity = new $identityCls($nick);
         }
 
-        $nick   = $this->_connection->normalizeNick($identity->getNick());
-        $key    = array_search($nick, $this->_nicks);
+        $collator   = $this->_connection->getCollator();
+        $nick       = $collator->normalizeNick($identity->getNick());
+        $key        = array_search($nick, $this->_nicks);
 
         if ($key === FALSE)
             throw new Erebot_NotFoundException($fmt->_('No such user'));
@@ -709,7 +718,8 @@ extends Erebot_Module_Base
 
         $fmt = $this->getFormatter(NULL);
         if (is_string($token)) {
-            $token = $this->_connection->normalizeNick(
+            $collator   = $this->_connection->getCollator();
+            $token      = $collator->normalizeNick(
                 Erebot_Utils::extractNick($token)
             );
             $token = array_search($token, $this->_nicks);
@@ -763,9 +773,10 @@ extends Erebot_Module_Base
         if ($nick === NULL)
             return isset($this->_chans[$chan]);
 
-        $nick   = Erebot_Utils::extractNick($nick);
-        $nick   = $this->_connection->normalizeNick($nick);
-        $key    = array_search($nick, $this->_nicks);
+        $nick       = Erebot_Utils::extractNick($nick);
+        $collator   = $this->_connection->getCollator();
+        $nick       = $collator->normalizeNick($nick);
+        $key        = array_search($nick, $this->_nicks);
         if ($key === FALSE)
             return FALSE;
         return isset($this->_chans[$chan][$key]);
@@ -788,9 +799,10 @@ extends Erebot_Module_Base
      */
     public function getCommonChans($nick)
     {
-        $nick   = Erebot_Utils::extractNick($nick);
-        $nick   = $this->_connection->normalizeNick($nick);
-        $key    = array_search($nick, $this->_nicks);
+        $nick       = Erebot_Utils::extractNick($nick);
+        $collator   = $this->_connection->getCollator();
+        $nick       = $collator->normalizeNick($nick);
+        $key        = array_search($nick, $this->_nicks);
         if ($key === FALSE)
             throw new Erebot_NotFoundException('No such user');
 
