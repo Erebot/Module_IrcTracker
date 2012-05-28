@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot\n"
+"Report-Msgid-Bugs-To: https://github.com/Erebot/Erebot/issues\n"
+"POT-Creation-Date: 2012-05-20 23:56+0200\n"
+"PO-Revision-Date: 2012-05-28 20:39+0000\n"
+"Last-Translator: François Poirotte <clicky@erebot.net>\n"
+"Language-Team: French (France) <i18n.fr_FR@erebot.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+
+# File: src/Erebot/Module/Math.php, line: 205
+msgid "% is undefined on real numbers"
+msgstr "L'opérateur % n'est pas défini sur les réels"
+
+# File: src/Erebot/Module/Math.php, line: 133
+msgid ""
+"<b>Usage:</b> !<var name='trigger'/> &lt;<u>formula</u>&gt;. Computes the "
+"given formula and displays the result. The four basic operators (+, -, *, "
+"/), parenthesis, exponentiation (^) and modules (%) are supported."
+msgstr "<b>Usage :</b> !<var name='trigger'/> &lt;<u>formule</u>&gt;. Calcule la formule donnée et affiche le résultat.. Les quatres opérateurs basics (+, -, *, /), les parenthèses, la puissance (^) et le modulo (%) sont supportés."
+
+# File: src/Erebot/Module/Math.php, line: 176
+msgid "<var name=\"formula\"/> = <b><var name=\"result\"/></b>"
+msgstr "<var name=\"formula\"/> = <b><var name=\"result\"/></b>"
+
+# File: src/Erebot/Module/Math.php, line: 69
+msgid "Could not register Math trigger"
+msgstr "Impossible d'enregistrer le déclencheur pour le module Math"
+
+# File: src/Erebot/Module/Math.php, line: 187
+msgid "Division by zero"
+msgstr "Division par zéro"
+
+# File: src/Erebot/Module/Math.php, line: 193
+msgid "Exponent is too big for computation"
+msgstr "L'exposant est trop grand pour ce calcul"
+
+# File: src/Erebot/Module/Math.php, line: 120
+msgid ""
+"Provides the <b><var name=\"trigger\"/></b> command which allows you to "
+"submit formulae to the bot for computation."
+msgstr "Fournit la commande <b><var name=\"trigger\"/></b> permettant de soumettre une formule au bot pour calcul."
+
+# File: src/Erebot/Module/Math.php, line: 211
+msgid "Syntax error"
+msgstr "Erreur de syntaxe"
+
+# File: src/Erebot/Module/Math.php, line: 199
+msgid "^ is undefined for negative exponents"
+msgstr "L'opérateur ^ n'est pas défini avec des exposants négatifs"
