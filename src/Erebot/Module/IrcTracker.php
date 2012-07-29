@@ -125,17 +125,17 @@ extends Erebot_Module_Base
             $this->_connection->addEventHandler($handler);
 
             // Handles information received when the bot joins a channel.
-            $raw = new Erebot_RawHandler(
+            $numeric = new Erebot_NumericHandler(
                 new Erebot_Callable(array($this, 'handleNames')),
-                $this->getRawRef('RPL_NAMEREPLY')
+                $this->getNumRef('RPL_NAMEREPLY')
             );
-            $this->_connection->addRawHandler($raw);
+            $this->_connection->addNumericHandler($numeric);
 
-            $raw = new Erebot_RawHandler(
+            $numeric = new Erebot_NumericHandler(
                 new Erebot_Callable(array($this, 'handleWho')),
-                $this->getRawRef('RPL_WHOREPLY')
+                $this->getNumRef('RPL_WHOREPLY')
             );
-            $this->_connection->addRawHandler($raw);
+            $this->_connection->addNumericHandler($numeric);
 
             // Handles modes given/taken to/from users on IRC channels.
             $handler = new Erebot_EventHandler(
@@ -425,26 +425,26 @@ extends Erebot_Module_Base
      * Handles a list with the nicknames
      * of all users in a given IRC channel.
      *
-     * \param Erebot_Interface_RawHandler $handler
+     * \param Erebot_Interface_NumericHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Raw $raw
-     *      A raw event with the nicknames of users
+     * \param Erebot_Interface_Event_Numeric $numeric
+     *      A numeric event with the nicknames of users
      *      in an IRC channel the bot just joined.
-     *      This is the same type of raw event as
+     *      This is the same type of numeric event as
      *      when the NAMES command is issued.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleNames(
-        Erebot_Interface_RawHandler $handler,
-        Erebot_Interface_Event_Raw  $raw
+        Erebot_Interface_NumericHandler $handler,
+        Erebot_Interface_Event_Numeric  $numeric
     )
     {
-        $text   = $raw->getText();
+        $text   = $numeric->getText();
         $chan   = $text[1];
         $users  = new Erebot_TextWrapper(
-            ltrim($raw->getText()->getTokens(2), ':')
+            ltrim($numeric->getText()->getTokens(2), ':')
         );
 
         try {
@@ -494,21 +494,21 @@ extends Erebot_Module_Base
     /**
      * Handles information about some user.
      *
-     * \param Erebot_Interface_RawHandler $handler
+     * \param Erebot_Interface_NumericHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Raw $raw
-     *      Raw event containing some user's nickname,
+     * \param Erebot_Interface_Event_Numeric $numeric
+     *      Numeric event containing some user's nickname,
      *      IRC identity and hostname.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleWho(
-        Erebot_Interface_RawHandler $handler,
-        Erebot_Interface_Event_Raw  $raw
+        Erebot_Interface_NumericHandler $handler,
+        Erebot_Interface_Event_Numeric  $numeric
     )
     {
-        $text = $raw->getText();
+        $text = $numeric->getText();
         $this->_updateUser($text[4], $text[1], $text[2]);
     }
 
