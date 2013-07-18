@@ -3,13 +3,16 @@
     <property name="qa.coverage.force" value="false"/>
     <property name="tagfiles" value="Erebot"/>
 
+    <fileset dir="." id="phar.files">
+        <exclude name="**"/>
+    </fileset>
+
     <fileset dir="src/" id="sources">
         <include name="**/*.php"/>
     </fileset>
 
     <fileset dir="tests/" id="tests">
         <include name="**/*.php"/>
-        <exclude name="testenv/**/*.php"/>
     </fileset>
 
     <import file="buildenv/build.xml"/>
