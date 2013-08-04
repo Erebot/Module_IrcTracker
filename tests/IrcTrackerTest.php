@@ -99,6 +99,19 @@ extends Erebot_Testenv_Module_TestCase
     }
 
     /**
+     * @covers Erebot_Module_IrcTracker::extractNick
+     */
+    public function testExtractNick()
+    {
+        $extracted = Erebot_Module_IrcTracker::extractNick('foo!bar@baz.qux');
+        $this->assertEquals('foo', $extracted);
+        $this->assertEquals(
+            $extracted,
+            Erebot_Module_IrcTracker::extractNick($extracted)
+        );
+    }
+
+    /**
      * @expectedException   Erebot_NotFoundException
      */
     public function testInvalidToken()
