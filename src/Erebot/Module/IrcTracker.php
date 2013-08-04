@@ -177,6 +177,33 @@ extends Erebot_Module_Base
     }
 
     /**
+     * Given some user's full IRC identity (nick!ident\@host),
+     * this methods extracts and returns that user's nickname.
+     *
+     * \param string $source
+     *      Some user's full IRC identity (as "nick!ident\@host").
+     *
+     * \retval string
+     *      The nickname of the user represented by that identity.
+     *
+     * \note
+     *      This method will still work as expected if given
+     *      only a nickname to work with. Therefore, it is safe
+     *      to call this method with the result of a previous
+     *      invocation. Thus, the following snippet:
+     *      Erebot_Module_IrcTracker::extractNick(
+     *          Erebot_Module_IrcTracker::extractNick('foo!bar\@baz')
+     *      );
+     *      will return "foo" as expected.
+     */
+    static public function extractNick($source)
+    {
+        if (strpos($source, '!') === FALSE)
+            return $source;
+        return substr($source, 0, strpos($source, '!'));
+    }
+
+    /**
      * Updates the IAL with new information on some user.
      *
      * \param string $nick
@@ -564,7 +591,7 @@ extends Erebot_Module_Base
     )
     {
         $user       = $event->getTarget();
-        $nick       = Erebot_Utils::extractNick($user);
+        $nick       = self::extractNick($user);
         $collator   = $this->_connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
@@ -595,7 +622,7 @@ extends Erebot_Module_Base
     )
     {
         $user       = $event->getTarget();
-        $nick       = Erebot_Utils::extractNick($user);
+        $nick       = self::extractNick($user);
         $collator   = $this->_connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
         $key        = array_search($normNick, $this->_nicks);
@@ -720,7 +747,7 @@ extends Erebot_Module_Base
         if (is_string($token)) {
             $collator   = $this->_connection->getCollator();
             $token      = $collator->normalizeNick(
-                Erebot_Utils::extractNick($token)
+                self::extractNick($token)
             );
             $token = array_search($token, $this->_nicks);
             if ($token === FALSE) {
@@ -773,7 +800,7 @@ extends Erebot_Module_Base
         if ($nick === NULL)
             return isset($this->_chans[$chan]);
 
-        $nick       = Erebot_Utils::extractNick($nick);
+        $nick       = self::extractNick($nick);
         $collator   = $this->_connection->getCollator();
         $nick       = $collator->normalizeNick($nick);
         $key        = array_search($nick, $this->_nicks);
@@ -799,7 +826,7 @@ extends Erebot_Module_Base
      */
     public function getCommonChans($nick)
     {
-        $nick       = Erebot_Utils::extractNick($nick);
+        $nick       = self::extractNick($nick);
         $collator   = $this->_connection->getCollator();
         $nick       = $collator->normalizeNick($nick);
         $key        = array_search($nick, $this->_nicks);
