@@ -11,13 +11,13 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Erebot/Erebot_API.git",
-                "reference": "6c7ed0a4a0c078604af97739a2dfc48d4eae1e18"
+                "reference": "8b5053181addb13e6de26974b2fb065ca7e80ad9"
             },
             "dist": {
                 "type": "tar",
-                "url": "https://packages.erebot.net:943/composer/erebot-api-6c7ed0a4a0c078604af97739a2dfc48d4eae1e18-zip-decce0.tar",
+                "url": "https://packages.erebot.net:943/composer/erebot-api-8b5053181addb13e6de26974b2fb065ca7e80ad9-zip-5daf3b.tar",
                 "reference": "dev-master",
-                "shasum": "0dc96387d5683c928ba0ec386ed9146ad5a0f877"
+                "shasum": "1280a153539f38c49a4767662594010017fc0db7"
             },
             "require": {
                 "php": ">=5.2.2"
@@ -60,7 +60,7 @@
                 "irc": "irc://irc.iiens.net/Erebot",
                 "source": "https://github.com/Erebot/Erebot_API"
             },
-            "time": "2013-06-23 21:22:11"
+            "time": "2013-08-05 20:12:46"
         },
         {
             "name": "erebot/generic-doc",
@@ -68,13 +68,13 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Erebot/Erebot_Module_Skeleton_Doc.git",
-                "reference": "6864d4b0b3ef044836d0a4d26df8b1df933fb91d"
+                "reference": "4420ea26cd7782decf71927282a8db2219016f48"
             },
             "dist": {
                 "type": "tar",
-                "url": "https://packages.erebot.net:943/composer/erebot-generic-doc-6864d4b0b3ef044836d0a4d26df8b1df933fb91d-zip-f1b4ff.tar",
+                "url": "https://packages.erebot.net:943/composer/erebot-generic-doc-4420ea26cd7782decf71927282a8db2219016f48-zip-ca4fc4.tar",
                 "reference": "dev-master",
-                "shasum": "b0efe0dfb3724e8333545f475bf740f896a77c6d"
+                "shasum": "042a600ff95c274a8c187a1ef4c3d313f4d9c82a"
             },
             "require": {
                 "erebot/installers": "dev-master"
@@ -111,7 +111,7 @@
                 "irc": "irc://irc.iiens.net/Erebot",
                 "source": "https://github.com/Erebot/Erebot_Module_Skeleton"
             },
-            "time": "2013-06-27 20:44:06"
+            "time": "2013-07-13 20:12:07"
         },
         {
             "name": "erebot/installers",
@@ -173,15 +173,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Erebot/Erebot_Buildenv.git",
-                "reference": "03c621d56756a2412065ba6094034f5ca22f31c8"
+                "reference": "8c394eb1f6e5fb7840e00b8f4bd91063fd7ef5ea"
             },
             "dist": {
                 "type": "tar",
-                "url": "https://packages.erebot.net:943/composer/erebot-buildenv-03c621d56756a2412065ba6094034f5ca22f31c8-zip-46b166.tar",
+                "url": "https://packages.erebot.net:943/composer/erebot-buildenv-8c394eb1f6e5fb7840e00b8f4bd91063fd7ef5ea-zip-083900.tar",
                 "reference": "dev-master",
-                "shasum": "0b97c2b2ef495c5be8b53ee7d508e8ccdbdde46c"
+                "shasum": "0f240c2544ce890c51dfbeccf0c654e4c2d7999e"
             },
             "require": {
+                "ext-phar": "*",
+                "ext-xsl": "*",
                 "phing/phing": ">=2.4.3",
                 "php": ">=5.2.2"
             },
@@ -220,7 +222,7 @@
                 "irc": "irc://irc.iiens.net/Erebot",
                 "source": "https://github.com/Erebot/Erebot_Buildenv"
             },
-            "time": "2013-06-24 21:53:45"
+            "time": "2013-08-15 12:34:34"
         },
         {
             "name": "erebot/testenv",
