@@ -14,19 +14,18 @@
     "support": {
         "email": "erebot@erebot.net",
         "issues": "https://github.com/Erebot/Erebot_Module_IrcTracker/issues",
-        "wiki": "http://erebot.github.com/Erebot_Module_IrcTracker/",
+        "wiki": "http://erebot.github.io/Erebot_Module_IrcTracker/",
         "irc": "irc://irc.iiens.net/Erebot",
         "source": "https://github.com/Erebot/Erebot_Module_IrcTracker"
     },
     "require": {
         "php": ">=5.2.2",
-        "erebot/api": "dev-master",
-        "erebot/installers": "dev-master",
-        "erebot/generic-doc": "dev-master"
+        "erebot/api": "~0.6.1",
+        "erebot/generic-doc": "~0.1.0"
     },
     "require-dev": {
-        "erebot/buildenv": "dev-master",
-        "erebot/testenv": "dev-master"
+        "erebot/buildenv": "~1.1",
+        "erebot/testenv": "~1.0"
     },
     "autoload": {
         "psr-0": {
