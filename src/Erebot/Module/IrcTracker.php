@@ -21,8 +21,9 @@
  *      A module that keeps track of users which are
  *      on the same IRC channels as the bot.
  */
-class   Erebot_Module_IrcTracker
-extends Erebot_Module_Base
+class       Erebot_Module_IrcTracker
+extends     Erebot_Module_Base
+implements  Erebot_Interface_HelpEnabled
 {
     /// Maps tokens to normalized nicknames.
     protected $_nicks;
@@ -173,6 +174,35 @@ extends Erebot_Module_Base
         foreach ($this->_ial as $entry) {
             if (isset($entry['TIMER']))
                 $this->removeTimer($entry['TIMER']);
+        }
+    }
+
+    /// \copydoc Erebot_Interface_HelpEnabled::getHelp()
+    public function getHelp(
+        Erebot_Interface_Event_Base_TextMessage $event,
+        Erebot_Interface_TextWrapper            $words
+    )
+    {
+        if ($event instanceof Erebot_Interface_Event_Base_Private) {
+            $target = $event->getSource();
+            $chan   = NULL;
+        }
+        else
+            $target = $chan = $event->getChan();
+
+        $fmt        = $this->getFormatter($chan);
+        $moduleName = strtolower(get_class());
+        $nbArgs     = count($words);
+
+        if ($nbArgs == 1 && $words[0] == $moduleName) {
+            $msg = $fmt->_(
+                "This module does not provide any command, but ".
+                "provides a way for other modules to keep track ".
+                "of IRC users through nick changes, disconnections ".
+                "and so on."
+            );
+            $this->sendMessage($target, $msg);
+            return TRUE;
         }
     }
 

@@ -40,9 +40,28 @@ extends Erebot_Module_IrcTracker
     }
 }
 
+class FakeHelper3
+{
+    public function realRegisterHelpMethod(
+        Erebot_Module_Base          $module,
+        Erebot_Interface_Callable   $callable
+    )
+    {
+    }
+}
+
 class   IALTest
 extends Erebot_Testenv_Module_TestCase
 {
+    protected function _setConnectionExpectations()
+    {
+        parent::_setConnectionExpectations();
+        $this->_connection
+            ->expects($this->any())
+            ->method('getModule')
+            ->will($this->returnValue(new FakeHelper()));
+    }
+
     public function setUp()
     {
         $this->_module = new TrackerHelper(NULL);

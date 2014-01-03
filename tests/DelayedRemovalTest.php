@@ -25,9 +25,28 @@ extends Erebot_Module_IrcTracker_Token
     }
 }
 
+class FakeHelper2
+{
+    public function realRegisterHelpMethod(
+        Erebot_Module_Base          $module,
+        Erebot_Interface_Callable   $callable
+    )
+    {
+    }
+}
+
 class   DelayedRemovalTest
 extends Erebot_Testenv_Module_TestCase
 {
+    protected function _setConnectionExpectations()
+    {
+        parent::_setConnectionExpectations();
+        $this->_connection
+            ->expects($this->any())
+            ->method('getModule')
+            ->will($this->returnValue(new FakeHelper2()));
+    }
+
     protected function _mockJoin($nick, $ident, $host)
     {
         $event = $this->getMock(

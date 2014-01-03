@@ -16,9 +16,28 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+class FakeHelper
+{
+    public function realRegisterHelpMethod(
+        Erebot_Module_Base          $module,
+        Erebot_Interface_Callable   $callable
+    )
+    {
+    }
+}
+
 class   IrcTrackerTest
 extends Erebot_Testenv_Module_TestCase
 {
+    protected function _setConnectionExpectations()
+    {
+        parent::_setConnectionExpectations();
+        $this->_connection
+            ->expects($this->any())
+            ->method('getModule')
+            ->will($this->returnValue(new FakeHelper()));
+    }
+
     protected function _mockNick($oldnick, $newnick)
     {
         $event = $this->getMock(
