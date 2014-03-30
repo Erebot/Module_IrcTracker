@@ -142,7 +142,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
             // Handles modes given/taken to/from users on IRC channels.
             $handler = new \Erebot\EventHandler(
                 \Erebot\CallableWrapper::wrap(array($this, 'handleChanModeAddition')),
-                \Erebot\Event\Match\Type(
+                new \Erebot\Event\Match\Type(
                     '\\Erebot\\Interfaces\\Event\\Base\\ChanModeGiven'
                 )
             );
