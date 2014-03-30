@@ -17,51 +17,32 @@
 */
 
 class   TrackerHelper
-extends Erebot_Module_IrcTracker
+extends \Erebot\Module\IrcTracker
 {
     public function getNicks()
     {
-        return $this->_nicks;
+        return $this->nicks;
     }
 
     public function getIAL()
     {
-        return $this->_ial;
+        return $this->ial;
     }
 
     public function getChans()
     {
-        return $this->_chans;
+        return $this->chans;
     }
 
-    public function updateUser($nick, $ident, $host)
+    public function publicUpdateUser($nick, $ident, $host)
     {
-        return $this->_updateUser($nick, $ident, $host);
-    }
-}
-
-class FakeHelper3
-{
-    public function realRegisterHelpMethod(
-        Erebot_Module_Base          $module,
-        Erebot_Interface_Callable   $callable
-    )
-    {
+        return $this->updateUser($nick, $ident, $host);
     }
 }
 
 class   IALTest
 extends Erebot_Testenv_Module_TestCase
 {
-    protected function _setConnectionExpectations()
-    {
-        parent::_setConnectionExpectations();
-        $this->_connection
-            ->expects($this->any())
-            ->method('getModule')
-            ->will($this->returnValue(new FakeHelper()));
-    }
-
     public function setUp()
     {
         $this->_module = new TrackerHelper(NULL);
@@ -72,22 +53,22 @@ extends Erebot_Testenv_Module_TestCase
             ->method('parseInt')
             ->will($this->returnValue(0));
 
-        $this->_module->reload(
+        $this->_module->reloadModule(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_MEMBERS
+            \Erebot\Module\Base::RELOAD_MEMBERS
         );
     }
 
     public function tearDown()
     {
-        $this->_module->unload();
+        $this->_module->unloadModule();
         parent::tearDown();
     }
 
     public function testIAL()
     {
-        $this->_module->updateUser('nick', NULL, NULL);
-        $this->_module->updateUser('nick', 'ident', 'host');
+        $this->_module->publicUpdateUser('nick', NULL, NULL);
+        $this->_module->publicUpdateUser('nick', 'ident', 'host');
 
         $this->assertEquals(
             array(
@@ -105,8 +86,8 @@ extends Erebot_Testenv_Module_TestCase
 
     public function testIAL2()
     {
-        $this->_module->updateUser('nick', 'ident', 'host');
-        $this->_module->updateUser('nick', NULL, NULL);
+        $this->_module->publicUpdateUser('nick', 'ident', 'host');
+        $this->_module->publicUpdateUser('nick', NULL, NULL);
 
         $this->assertEquals(
             array(
@@ -124,8 +105,8 @@ extends Erebot_Testenv_Module_TestCase
 
     public function testIAL3()
     {
-        $this->_module->updateUser('nick', NULL, NULL);
-        $this->_module->updateUser('nick', NULL, NULL);
+        $this->_module->publicUpdateUser('nick', NULL, NULL);
+        $this->_module->publicUpdateUser('nick', NULL, NULL);
 
         $this->assertEquals(
             array(
@@ -143,8 +124,8 @@ extends Erebot_Testenv_Module_TestCase
 
     public function testIAL4()
     {
-        $this->_module->updateUser('nick', 'ident', 'host');
-        $this->_module->updateUser('nick', 'ident', 'host');
+        $this->_module->publicUpdateUser('nick', 'ident', 'host');
+        $this->_module->publicUpdateUser('nick', 'ident', 'host');
 
         $this->assertEquals(
             array(

@@ -17,45 +17,26 @@
 */
 
 class   TestToken
-extends Erebot_Module_IrcTracker_Token
+extends \Erebot\Module\IrcTracker\Token
 {
     public function getToken()
     {
-        return $this->_token;
-    }
-}
-
-class FakeHelper2
-{
-    public function realRegisterHelpMethod(
-        Erebot_Module_Base          $module,
-        Erebot_Interface_Callable   $callable
-    )
-    {
+        return $this->token;
     }
 }
 
 class   DelayedRemovalTest
 extends Erebot_Testenv_Module_TestCase
 {
-    protected function _setConnectionExpectations()
-    {
-        parent::_setConnectionExpectations();
-        $this->_connection
-            ->expects($this->any())
-            ->method('getModule')
-            ->will($this->returnValue(new FakeHelper2()));
-    }
-
     protected function _mockJoin($nick, $ident, $host)
     {
         $event = $this->getMock(
-            'Erebot_Interface_Event_Join',
+            '\\Erebot\\Interfaces\\Event\\Join',
             array(), array(), '', FALSE, FALSE
         );
 
         $identity = $this->getMock(
-            'Erebot_Interface_Identity',
+            '\\Erebot\\Interfaces\\Identity',
             array(), array(), '', FALSE, FALSE
         );
         $identity
@@ -88,11 +69,11 @@ extends Erebot_Testenv_Module_TestCase
 
     public function setUp()
     {
-        $this->_module = new Erebot_Module_IrcTracker(NULL);
+        $this->_module = new \Erebot\Module\IrcTracker(NULL);
         parent::setUp();
 
         $timer = $this->getMock(
-            'Erebot_Interface_Timer',
+            '\\Erebot\\TimerInterface',
             array(), array(), '', FALSE, FALSE
         );
         $this->_module->setFactory('!Timer', get_class($timer));
@@ -102,9 +83,9 @@ extends Erebot_Testenv_Module_TestCase
             ->method('parseInt')
             ->will($this->returnValue(10));
 
-        $this->_module->reload(
+        $this->_module->reloadModule(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_MEMBERS
+            \Erebot\Module\Base::RELOAD_MEMBERS
         );
 
         $event = $this->_mockJoin('attacker', 'evil', 'guy');
@@ -117,7 +98,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->assertEquals("foo", (string) $this->_token);
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Quit',
+            '\\Erebot\\Interfaces\\Event\\Quit',
             array(), array(), '', FALSE, FALSE
         );
         $event
@@ -138,7 +119,7 @@ extends Erebot_Testenv_Module_TestCase
 
     public function tearDown()
     {
-        $this->_module->unload();
+        $this->_module->unloadModule();
         parent::tearDown();
     }
 
@@ -146,7 +127,7 @@ extends Erebot_Testenv_Module_TestCase
     {
         // Simulate the timer going off.
         $timer = $this->getMock(
-            'Erebot_Interface_Timer',
+            '\\Erebot\\TimerInterface',
             array(), array(), '', FALSE, FALSE
         );
         $this->_module->removeUser($timer, 'foo');
@@ -159,7 +140,7 @@ extends Erebot_Testenv_Module_TestCase
     {
         $this->assertEquals(
             'foo!ident@host',
-            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $this->_token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
 
         // Same "foo" reconnects.
@@ -171,11 +152,11 @@ extends Erebot_Testenv_Module_TestCase
         $this->assertEquals($this->_token->getToken(), $token->getToken());
         $this->assertEquals(
             'foo!ident@host',
-            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
         $this->assertEquals(
             'foo!ident@host',
-            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $this->_token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
     }
 
@@ -183,13 +164,13 @@ extends Erebot_Testenv_Module_TestCase
     {
         $this->assertEquals(
             'foo!ident@host',
-            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $this->_token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
 
         // Attacker tries to hijack foo's identity
         // by changing his nick into "foo".
         $event = $this->getMock(
-            'Erebot_Interface_Event_Nick',
+            '\\Erebot\\Interfaces\\Event\\Nick',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -214,7 +195,7 @@ extends Erebot_Testenv_Module_TestCase
         // The mask must reflect the difference.
         $this->assertEquals(
             'foo!evil@guy',
-            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
         // And the old token must have been invalidated.
         $this->assertEquals('???', (string) $this->_token);
@@ -224,7 +205,7 @@ extends Erebot_Testenv_Module_TestCase
     {
         $this->assertEquals(
             'foo!ident@host',
-            $this->_token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $this->_token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
 
         // Attacker reconnects as "foo".
@@ -237,7 +218,7 @@ extends Erebot_Testenv_Module_TestCase
         // The mask must reflect the difference.
         $this->assertEquals(
             'foo!evil@guy',
-            $token->getMask(Erebot_Interface_Identity::CANON_IPV6)
+            $token->getMask(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
         // And the old token must have been invalidated.
         $this->assertEquals('???', (string) $this->_token);

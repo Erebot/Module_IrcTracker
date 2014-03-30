@@ -16,32 +16,33 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+namespace Erebot\Module\IrcTracker;
+
 /**
  * An object meant to hold a token, which can subsequently
  * be used to retrieve information on the associated user.
  */
-class       Erebot_Module_IrcTracker_Token
-implements  Erebot_Interface_Identity
+class Token implements \Erebot\Interfaces\Identity
 {
     /// Reference to the tracker this token belongs to.
-    protected $_tracker;
+    protected $tracker;
 
     /// The actuel token, which uniquely identifies users on an IRC network.
-    protected $_token;
+    protected $token;
 
     /**
      * Construct a new token holder.
      *
-     * \param Erebot_Module_IrcTracker $tracker
+     * \param Erebot::Module::IrcTracker $tracker
      *      An instance of the tracking module.
      *
      * \param opaque $token
      *      The token to store in this object.
      */
-    public function __construct(Erebot_Module_IrcTracker $tracker, $token)
+    public function __construct(\Erebot\Module\IrcTracker $tracker, $token)
     {
-        $this->_tracker = $tracker;
-        $this->_token   = $token;
+        $this->tracker  = $tracker;
+        $this->token    = $token;
     }
 
     /**
@@ -53,9 +54,9 @@ implements  Erebot_Interface_Identity
      */
     public function getNick()
     {
-        return $this->_tracker->getInfo(
-            $this->_token,
-            Erebot_Module_IrcTracker::INFO_NICK
+        return $this->tracker->getInfo(
+            $this->token,
+            \Erebot\Module\IrcTracker::INFO_NICK
         );
     }
 
@@ -78,9 +79,9 @@ implements  Erebot_Interface_Identity
      */
     public function getIdent()
     {
-        return $this->_tracker->getInfo(
-            $this->_token,
-            Erebot_Module_IrcTracker::INFO_IDENT
+        return $this->tracker->getInfo(
+            $this->token,
+            \Erebot\Module\IrcTracker::INFO_IDENT
         );
     }
 
@@ -89,8 +90,8 @@ implements  Erebot_Interface_Identity
      * represented by this identity.
      *
      * \param opaque $canonical
-     *      Either Erebot_Interface_Identity::CANON_IPV4 or
-     *      Erebot_Interface_Identity::CANON_IPV6, indicating
+     *      Either Erebot::Interfaces::Identity::CANON_IPV4 or
+     *      Erebot::Interfaces::Identity::CANON_IPV6, indicating
      *      the type of IP canonicalization to use.
      *
      * \retval string
@@ -98,9 +99,9 @@ implements  Erebot_Interface_Identity
      */
     public function getHost($canonical)
     {
-        return $this->_tracker->getInfo(
-            $this->_token,
-            Erebot_Module_IrcTracker::INFO_HOST,
+        return $this->tracker->getInfo(
+            $this->token,
+            \Erebot\Module\IrcTracker::INFO_HOST,
             array($canonical)
         );
     }
@@ -110,8 +111,8 @@ implements  Erebot_Interface_Identity
      * to match against this user.
      *
      * \param opaque $canonical
-     *      Either Erebot_Interface_Identity::CANON_IPV4 or
-     *      Erebot_Interface_Identity::CANON_IPV6, indicating
+     *      Either Erebot::Interfaces::Identity::CANON_IPV4 or
+     *      Erebot::Interfaces::Identity::CANON_IPV6, indicating
      *      the type of IP canonicalization to use.
      *
      * \retval string
@@ -125,9 +126,9 @@ implements  Erebot_Interface_Identity
      */
     public function getMask($canonical)
     {
-        return $this->_tracker->getInfo(
-            $this->_token,
-            Erebot_Module_IrcTracker::INFO_MASK,
+        return $this->tracker->getInfo(
+            $this->token,
+            \Erebot\Module\IrcTracker::INFO_MASK,
             array($canonical)
         );
     }
@@ -142,14 +143,14 @@ implements  Erebot_Interface_Identity
      */
     public function isOn()
     {
-        return $this->_tracker->getInfo(
-            $this->_token,
-            Erebot_Module_IrcTracker::INFO_ISON
+        return $this->tracker->getInfo(
+            $this->token,
+            \Erebot\Module\IrcTracker::INFO_ISON
         );
     }
 
     /**
-     * This method works like Erebot_Interface_Identity::getNick(),
+     * This method works like Erebot::Interface::Identity::getNick(),
      * except that if no information is available on the user's
      * nickname, it returns "???".
      *
@@ -161,10 +162,8 @@ implements  Erebot_Interface_Identity
     {
         try {
             return $this->getNick();
-        }
-        catch (Erebot_NotFoundException $e) {
+        } catch (\Erebot\NotFoundException $e) {
             return "???";
         }
     }
 }
-

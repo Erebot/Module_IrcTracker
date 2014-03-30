@@ -16,32 +16,13 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class FakeHelper
-{
-    public function realRegisterHelpMethod(
-        Erebot_Module_Base          $module,
-        Erebot_Interface_Callable   $callable
-    )
-    {
-    }
-}
-
 class   IrcTrackerTest
 extends Erebot_Testenv_Module_TestCase
 {
-    protected function _setConnectionExpectations()
-    {
-        parent::_setConnectionExpectations();
-        $this->_connection
-            ->expects($this->any())
-            ->method('getModule')
-            ->will($this->returnValue(new FakeHelper()));
-    }
-
     protected function _mockNick($oldnick, $newnick)
     {
         $event = $this->getMock(
-            'Erebot_Interface_Event_Nick',
+            '\\Erebot\\Interfaces\\Event\\Nick',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -62,7 +43,7 @@ extends Erebot_Testenv_Module_TestCase
 
     public function setUp()
     {
-        $this->_module = new Erebot_Module_IrcTracker(NULL);
+        $this->_module = new \Erebot\Module\IrcTracker(NULL);
         parent::setUp();
 
         $this->_networkConfig
@@ -70,13 +51,13 @@ extends Erebot_Testenv_Module_TestCase
             ->method('parseInt')
             ->will($this->returnValue(0));
 
-        $this->_module->reload(
+        $this->_module->reloadModule(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_MEMBERS
+            \Erebot\Module\Base::RELOAD_MEMBERS
         );
 
         $identity = $this->getMock(
-            'Erebot_Interface_Identity',
+            '\\Erebot\\Interfaces\\Identity',
             array(), array(), '', FALSE, FALSE
         );
         $identity
@@ -93,7 +74,7 @@ extends Erebot_Testenv_Module_TestCase
             ->will($this->returnValue('host'));
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Join',
+            '\\Erebot\\Interfaces\\Event\\Join',
             array(), array(), '', FALSE, FALSE
         );
         $event
@@ -113,29 +94,29 @@ extends Erebot_Testenv_Module_TestCase
 
     public function tearDown()
     {
-        $this->_module->unload();
+        $this->_module->unloadModule();
         parent::tearDown();
     }
 
     /**
-     * @covers Erebot_Module_IrcTracker::extractNick
+     * @covers \Erebot\Module\IrcTracker::extractNick
      */
     public function testExtractNick()
     {
-        $extracted = Erebot_Module_IrcTracker::extractNick('foo!bar@baz.qux');
+        $extracted = \Erebot\Module\IrcTracker::extractNick('foo!bar@baz.qux');
         $this->assertEquals('foo', $extracted);
         $this->assertEquals(
             $extracted,
-            Erebot_Module_IrcTracker::extractNick($extracted)
+            \Erebot\Module\IrcTracker::extractNick($extracted)
         );
     }
 
     /**
-     * @expectedException   Erebot_NotFoundException
+     * @expectedException   \Erebot\NotFoundException
      */
     public function testInvalidToken()
     {
-        $this->_module->getInfo(NULL, Erebot_Module_IrcTracker::INFO_NICK);
+        $this->_module->getInfo(NULL, \Erebot\Module\IrcTracker::INFO_NICK);
     }
 
     public function testTrackingThroughNickChanges()
@@ -162,7 +143,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Kick',
+            '\\Erebot\\Interfaces\\Event\\Kick',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -189,7 +170,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Part',
+            '\\Erebot\\Interfaces\\Event\\Part',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -216,7 +197,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->assertEquals("foo", (string) $token);
 
         $event = $this->getMock(
-            'Erebot_Interface_Event_Quit',
+            '\\Erebot\\Interfaces\\Event\\Quit',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -236,11 +217,11 @@ extends Erebot_Testenv_Module_TestCase
     public function testByChannelModes()
     {
         $users = array(
-            'Q' => 'Erebot_Interface_Event_Owner',
-            'A' => 'Erebot_Interface_Event_Protect',
-            'O' => 'Erebot_Interface_Event_Op',
-            'H' => 'Erebot_Interface_Event_Halfop',
-            'V' => 'Erebot_Interface_Event_Voice',
+            'Q' => '\\Erebot\\Interfaces\\Event\\Owner',
+            'A' => '\\Erebot\\Interfaces\\Event\\Protect',
+            'O' => '\\Erebot\\Interfaces\\Event\\Op',
+            'H' => '\\Erebot\\Interfaces\\Event\\Halfop',
+            'V' => '\\Erebot\\Interfaces\\Event\\Voice',
             'FOO'   => FALSE,
         );
 
@@ -250,7 +231,7 @@ extends Erebot_Testenv_Module_TestCase
                 continue;
 
             $identity = $this->getMock(
-                'Erebot_Interface_Identity',
+                '\\Erebot\\Interfaces\\Identity',
                 array(), array(), '', FALSE, FALSE
             );
             $identity
@@ -267,7 +248,7 @@ extends Erebot_Testenv_Module_TestCase
                 ->will($this->returnValue('host'));
 
             $event = $this->getMock(
-                'Erebot_Interface_Event_Join',
+                '\\Erebot\\Interfaces\\Event\\Join',
                 array(), array(), '', FALSE, FALSE
             );
             $event
@@ -332,7 +313,7 @@ extends Erebot_Testenv_Module_TestCase
 
         // Protect "q".
         $event = $this->getMock(
-            'Erebot_Interface_Event_Protect',
+            '\\Erebot\\Interfaces\\Event\\Protect',
             array(), array(), '', FALSE, FALSE
         );
         $event

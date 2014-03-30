@@ -16,29 +16,29 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+namespace Erebot\Module;
+
 /**
  * \brief
  *      A module that keeps track of users which are
  *      on the same IRC channels as the bot.
  */
-class       Erebot_Module_IrcTracker
-extends     Erebot_Module_Base
-implements  Erebot_Interface_HelpEnabled
+class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpEnabled
 {
     /// Maps tokens to normalized nicknames.
-    protected $_nicks;
+    protected $nicks;
 
     /// Maps channels to a list of tokens for users present in that channel.
-    protected $_chans;
+    protected $chans;
 
     /// Whether the IRC server supports the UHNAMES extension or not.
-    protected $_hasUHNAMES;
+    protected $hasUHNAMES;
 
     /// Internal Address List, à la mIRC.
-    protected $_ial;
+    protected $ial;
 
     /// Sequence number, incremented by 1 after each new token generation.
-    protected $_sequence;
+    protected $sequence;
 
 
     /// Return the current nickname for some user.
@@ -61,7 +61,7 @@ implements  Erebot_Interface_HelpEnabled
      * This method is called whenever the module is (re)loaded.
      *
      * \param int $flags
-     *      A bitwise OR of the Erebot_Module_Base::RELOAD_*
+     *      A bitwise OR of the Erebot::Module::Base::RELOAD_*
      *      constants. Your method should take proper actions
      *      depending on the value of those flags.
      *
@@ -69,126 +69,126 @@ implements  Erebot_Interface_HelpEnabled
      *      See the documentation on individual RELOAD_*
      *      constants for a list of possible values.
      */
-    public function _reload($flags)
+    public function reload($flags)
     {
-        if ($this->_channel !== NULL)
+        if ($this->channel !== null) {
             return;
+        }
 
         if ($flags & self::RELOAD_MEMBERS) {
             if ($flags & self::RELOAD_INIT) {
-                $this->_chans       = array();
-                $this->_ial         = array();
-                $this->_hasUHNAMES  = FALSE;
-                $this->_nicks       = array();
-                $this->_sequence    = 0;
+                $this->chans        = array();
+                $this->ial          = array();
+                $this->hasUHNAMES   = false;
+                $this->nicks        = array();
+                $this->sequence     = 0;
             }
         }
 
         if ($flags & self::RELOAD_HANDLERS) {
             // Handles some user changing his nickname.
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleNick')),
-                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Nick')
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleNick')),
+                new \Erebot\Event\Match\Type('\\Erebot\\Interfaces\\Event\\Nick')
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
             // Handles some user joining a channel the bot is on.
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleJoin')),
-                new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Join')
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleJoin')),
+                new \Erebot\Event\Match\Type('\\Erebot\\Interfaces\\Event\\Join')
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
             // Handles some user leaving a channel (for various reasons).
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleLeaving')),
-                new Erebot_Event_Match_Any(
-                    new Erebot_Event_Match_InstanceOf(
-                        'Erebot_Interface_Event_Quit'
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleLeaving')),
+                new \Erebot\Event\Match\Any(
+                    new \Erebot\Event\Match\Type(
+                        '\\Erebot\\Interfaces\\Event\\Quit'
                     ),
-                    new Erebot_Event_Match_InstanceOf(
-                        'Erebot_Interface_Event_Part'
+                    new \Erebot\Event\Match\Type(
+                        '\\Erebot\\Interfaces\\Event\\Part'
                     ),
-                    new Erebot_Event_Match_InstanceOf(
-                        'Erebot_Interface_Event_Kick'
+                    new \Erebot\Event\Match\Type(
+                        '\\Erebot\\Interfaces\\Event\\Kick'
                     )
                 )
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
             // Handles possible extensions.
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleCapabilities')),
-                new Erebot_Event_Match_InstanceOf(
-                    'Erebot_Event_ServerCapabilities'
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleCapabilities')),
+                new \Erebot\Event\Match\Type(
+                    '\\Erebot\\Event\\ServerCapabilities'
                 )
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
             // Handles information received when the bot joins a channel.
-            $numeric = new Erebot_NumericHandler(
-                new Erebot_Callable(array($this, 'handleNames')),
+            $numeric = new \Erebot\NumericHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleNames')),
                 $this->getNumRef('RPL_NAMEREPLY')
             );
-            $this->_connection->addNumericHandler($numeric);
+            $this->connection->addNumericHandler($numeric);
 
-            $numeric = new Erebot_NumericHandler(
-                new Erebot_Callable(array($this, 'handleWho')),
+            $numeric = new \Erebot\NumericHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleWho')),
                 $this->getNumRef('RPL_WHOREPLY')
             );
-            $this->_connection->addNumericHandler($numeric);
+            $this->connection->addNumericHandler($numeric);
 
             // Handles modes given/taken to/from users on IRC channels.
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleChanModeAddition')),
-                new Erebot_Event_Match_InstanceOf(
-                    'Erebot_Interface_Event_Base_ChanModeGiven'
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleChanModeAddition')),
+                \Erebot\Event\Match\Type(
+                    '\\Erebot\\Interfaces\\Event\\Base\\ChanModeGiven'
                 )
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleChanModeRemoval')),
-                new Erebot_Event_Match_InstanceOf(
-                    'Erebot_Interface_Event_Base_ChanModeTaken'
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleChanModeRemoval')),
+                new \Erebot\Event\Match\Type(
+                    '\\Erebot\\Interfaces\\Event\\Base\\ChanModeTaken'
                 )
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
 
             // Handles users on the WATCH list (see also the WatchList module).
-            $handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleNotification')),
-                new Erebot_Event_Match_InstanceOf(
-                    'Erebot_Event_NotificationAbstract'
+            $handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleNotification')),
+                new \Erebot\Event\Match\Type(
+                    '\\Erebot\\Event\\NotificationAbstract'
                 )
             );
-            $this->_connection->addEventHandler($handler);
+            $this->connection->addEventHandler($handler);
         }
     }
 
     /**
      * Frees the resources associated with this module.
      */
-    protected function _unload()
+    protected function unload()
     {
-        foreach ($this->_ial as $entry) {
-            if (isset($entry['TIMER']))
+        foreach ($this->ial as $entry) {
+            if (isset($entry['TIMER'])) {
                 $this->removeTimer($entry['TIMER']);
+            }
         }
     }
 
-    /// \copydoc Erebot_Interface_HelpEnabled::getHelp()
     public function getHelp(
-        Erebot_Interface_Event_Base_TextMessage $event,
-        Erebot_Interface_TextWrapper            $words
-    )
-    {
-        if ($event instanceof Erebot_Interface_Event_Base_Private) {
+        \Erebot\Interfaces\Event\Base\TextMessage   $event,
+        \Erebot\Interfaces\TextWrapper              $words
+    ) {
+        if ($event instanceof \Erebot\Interfaces\Event\Base\PrivateMessage) {
             $target = $event->getSource();
-            $chan   = NULL;
-        }
-        else
+            $chan   = null;
+        } else {
             $target = $chan = $event->getChan();
+        }
 
         $fmt        = $this->getFormatter($chan);
         $moduleName = strtolower(get_class());
@@ -202,7 +202,7 @@ implements  Erebot_Interface_HelpEnabled
                 "and so on."
             );
             $this->sendMessage($target, $msg);
-            return TRUE;
+            return true;
         }
     }
 
@@ -221,15 +221,16 @@ implements  Erebot_Interface_HelpEnabled
      *      only a nickname to work with. Therefore, it is safe
      *      to call this method with the result of a previous
      *      invocation. Thus, the following snippet:
-     *      Erebot_Module_IrcTracker::extractNick(
-     *          Erebot_Module_IrcTracker::extractNick('foo!bar\@baz')
+     *      Erebot::Module::IrcTracker::extractNick(
+     *          Erebot::Module::IrcTracker::extractNick('foo!bar\@baz')
      *      );
      *      will return "foo" as expected.
      */
-    static public function extractNick($source)
+    public static function extractNick($source)
     {
-        if (strpos($source, '!') === FALSE)
+        if (strpos($source, '!') === false) {
             return $source;
+        }
         return substr($source, 0, strpos($source, '!'));
     }
 
@@ -246,45 +247,46 @@ implements  Erebot_Interface_HelpEnabled
      * \param string $host
      *      Some user's hostname.
      */
-    protected function _updateUser($nick, $ident, $host)
+    protected function updateUser($nick, $ident, $host)
     {
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
-        $key        = array_search($normNick, $this->_nicks);
-        if ($key === FALSE) {
-            $key = $this->_sequence++;
-            $this->_nicks[$key] = $normNick;
+        $key        = array_search($normNick, $this->nicks);
+        if ($key === false) {
+            $key = $this->sequence++;
+            $this->nicks[$key] = $normNick;
         }
 
-        if (isset($this->_ial[$key]['TIMER']))
-            $this->removeTimer($this->_ial[$key]['TIMER']);
+        if (isset($this->ial[$key]['TIMER'])) {
+            $this->removeTimer($this->ial[$key]['TIMER']);
+        }
 
-        if (!isset($this->_ial[$key]) || $this->_ial[$key]['ident'] === NULL) {
-            $this->_ial[$key] = array(
+        if (!isset($this->ial[$key]) || $this->ial[$key]['ident'] === null) {
+            $this->ial[$key] = array(
                 'nick'  => $nick,
                 'ident' => $ident,
                 'host'  => $host,
-                'ison'  => TRUE,
-                'TIMER' => NULL,
+                'ison'  => true,
+                'TIMER' => null,
             );
             return;
         }
 
-        if ($ident !== NULL) {
-            if ($this->_ial[$key]['ident'] != $ident ||
-                $this->_ial[$key]['host'] != $host) {
-                unset($this->_nicks[$key]);
-                unset($this->_ial[$key]);
-                $key = $this->_sequence++;
-                $this->_nicks[$key] = $normNick;
+        if ($ident !== null) {
+            if ($this->ial[$key]['ident'] != $ident ||
+                $this->ial[$key]['host'] != $host) {
+                unset($this->nicks[$key]);
+                unset($this->ial[$key]);
+                $key = $this->sequence++;
+                $this->nicks[$key] = $normNick;
             }
 
-            $this->_ial[$key] = array(
+            $this->ial[$key] = array(
                 'nick'  => $nick,
                 'ident' => $ident,
                 'host'  => $host,
-                'ison'  => TRUE,
-                'TIMER' => NULL,
+                'ison'  => true,
+                'TIMER' => null,
             );
         }
     }
@@ -296,28 +298,30 @@ implements  Erebot_Interface_HelpEnabled
      *      Nickname of the user that is to be removed
      *      from the IAL.
      */
-    protected function _removeUser($nick)
+    protected function realRemoveUser($nick)
     {
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $nick       = $collator->normalizeNick($nick);
-        $key        = array_search($nick, $this->_nicks);
+        $key        = array_search($nick, $this->nicks);
 
-        if ($key === FALSE)
+        if ($key === false) {
             return;
+        }
 
-        $this->_ial[$key]['TIMER'] = NULL;
-        if (!isset($this->_nicks[$key]) || count($this->getCommonChans($nick)))
+        $this->ial[$key]['TIMER'] = null;
+        if (!isset($this->nicks[$key]) || count($this->getCommonChans($nick))) {
             return;
+        }
 
-        unset($this->_nicks[$key]);
-        unset($this->_ial[$key]);
+        unset($this->nicks[$key]);
+        unset($this->ial[$key]);
     }
 
     /**
      * Removes some user from the IAL when the timer
      * associated with their disconnection times out.
      *
-     * \param Erebot_Interface_Timer $timer
+     * \param Erebot::TimerInterface $timer
      *      Timer associated with the user's disconnection.
      *
      * \param string $nick
@@ -325,125 +329,124 @@ implements  Erebot_Interface_HelpEnabled
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function removeUser(Erebot_Interface_Timer $timer, $nick)
+    public function removeUser(\Erebot\TimerInterface $timer, $nick)
     {
-        $this->_removeUser($nick);
+        $this->realRemoveUser($nick);
     }
 
     /**
      * Handles a notification about some user
      * (dis)connecting from/to the IRC network.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Base_Source $event
+     * \param Erebot::Interfaces::Event::Base::Source $event
      *      Notification.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleNotification(
-        Erebot_Interface_EventHandler       $handler,
-        Erebot_Interface_Event_Base_Source  $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler         $handler,
+        \Erebot\Interfaces\Event\Base\Source    $event
+    ) {
         $user = $event->getSource();
-        if ($event instanceof Erebot_Interface_Event_Notify) {
-            return $this->_updateUser(
+        if ($event instanceof \Erebot\Interfaces\Event\Notify) {
+            return $this->updateUser(
                 $user->getNick(),
                 $user->getIdent(),
-                $user->getHost(Erebot_Interface_Identity::CANON_IPV6)
+                $user->getHost(\Erebot\Interfaces\Identity::CANON_IPV6)
             );
         }
 
-        if ($event instanceof Erebot_Interface_Event_UnNotify) {
-            return $this->_removeUser($user->getNick());
+        if ($event instanceof \Erebot\Interfaces\Event\UnNotify) {
+            return $this->realRemoveUser($user->getNick());
         }
     }
 
     /**
      * Handles a nick change.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Nick $event
+     * \param Erebot::Interfaces::Event::Nick $event
      *      Nick change event.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleNick(
-        Erebot_Interface_EventHandler   $handler,
-        Erebot_Interface_Event_Nick     $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler $handler,
+        \Erebot\Interfaces\Event\Nick   $event
+    ) {
         $oldNick    = (string) $event->getSource();
         $newNick    = (string) $event->getTarget();
 
-        $collator       = $this->_connection->getCollator();
+        $collator       = $this->connection->getCollator();
         $normOldNick    = $collator->normalizeNick($oldNick);
         $normNewNick    = $collator->normalizeNick($newNick);
-        $key = array_search($normOldNick, $this->_nicks);
-        if ($key === FALSE)
+        $key = array_search($normOldNick, $this->nicks);
+        if ($key === false) {
             return;
+        }
 
-        $this->_removeUser($normNewNick);
-        $this->_nicks[$key]         = $normNewNick;
-        $this->_ial[$key]['nick']   = $newNick;
+        $this->realRemoveUser($normNewNick);
+        $this->nicks[$key]         = $normNewNick;
+        $this->ial[$key]['nick']   = $newNick;
     }
 
     /**
      * Handles some user leaving an IRC channel.
      * This may result from either a QUIT or KICK command.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Base_Generic $event
+     * \param Erebot::Interfaces::Event::Base::Generic $event
      *      An event indicating that some user is leaving
      *      an IRC channel the bot is on.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleLeaving(
-        Erebot_Interface_EventHandler       $handler,
-        Erebot_Interface_Event_Base_Generic $event
-    )
-    {
-        if ($event instanceof Erebot_Interface_Event_Kick)
+        \Erebot\Interfaces\EventHandler         $handler,
+        \Erebot\Interfaces\Event\Base\Generic   $event
+    ) {
+        if ($event instanceof \Erebot\Interfaces\Event\Kick) {
             $nick = (string) $event->getTarget();
-        else
+        } else {
             $nick = (string) $event->getSource();
-
-        $collator   = $this->_connection->getCollator();
-        $nick       = $collator->normalizeNick($nick);
-        $key        = array_search($nick, $this->_nicks);
-
-        if ($event instanceof Erebot_Interface_Event_Quit) {
-            foreach ($this->_chans as $chan => $data) {
-                if (isset($data[$key]))
-                    unset($this->_chans[$chan][$key]);
-            }
         }
-        else
-            unset($this->_chans[$event->getChan()][$key]);
+
+        $collator   = $this->connection->getCollator();
+        $nick       = $collator->normalizeNick($nick);
+        $key        = array_search($nick, $this->nicks);
+
+        if ($event instanceof \Erebot\Interfaces\Event\Quit) {
+            foreach ($this->chans as $chan => $data) {
+                if (isset($data[$key])) {
+                    unset($this->chans[$chan][$key]);
+                }
+            }
+        } else {
+            unset($this->chans[$event->getChan()][$key]);
+        }
 
         if (!count($this->getCommonChans($nick))) {
-            $this->_ial[$key]['ison'] = FALSE;
+            $this->ial[$key]['ison'] = false;
             $delay = $this->parseInt('expire_delay', 60);
-            if ($delay < 0)
+            if ($delay < 0) {
                 $delay = 0;
+            }
 
             if (!$delay) {
-                $this->_removeUser($nick);
-            }
-            else {
+                $this->realRemoveUser($nick);
+            } else {
                 $timerCls       = $this->getFactory('!Timer');
-                $callableCls    = $this->getFactory('!Callable');
                 $timer = new $timerCls(
-                    new $callableCls(array($this, 'removeUser')),
+                    \Erebot\CallableWrapper::wrap(array($this, 'removeUser')),
                     $delay,
-                    FALSE,
+                    false,
                     array($nick)
                 );
                 $this->addTimer($timer);
@@ -454,27 +457,27 @@ implements  Erebot_Interface_HelpEnabled
     /**
      * Handles server capabilities.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Event_ServerCapabilities $event
+     * \param Erebot::Event::ServerCapabilities $event
      *      An event referencing a module that can determine
      *      the IRC server's capabilities, such as
-     *      Erebot_Module_ServerCapabilities.
+     *      Erebot::Module::ServerCapabilities.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleCapabilities(
-        Erebot_Interface_EventHandler   $handler,
-        Erebot_Event_ServerCapabilities $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler     $handler,
+        \Erebot\Event\ServerCapabilities    $event
+    ) {
         $module = $event->getModule();
-        if ($module->hasExtendedNames())
+        if ($module->hasExtendedNames()) {
             $this->sendCommand('PROTOCTL NAMESX');
+        }
         if ($module->hasUserHostNames()) {
             $this->sendCommand('PROTOCTL UHNAMES');
-            $this->_hasUHNAMES = TRUE;
+            $this->hasUHNAMES = true;
         }
     }
 
@@ -482,10 +485,10 @@ implements  Erebot_Interface_HelpEnabled
      * Handles a list with the nicknames
      * of all users in a given IRC channel.
      *
-     * \param Erebot_Interface_NumericHandler $handler
+     * \param Erebot::Interfaces::NumericHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Numeric $numeric
+     * \param Erebot::Interfaces::Event::Numeric $numeric
      *      A numeric event with the nicknames of users
      *      in an IRC channel the bot just joined.
      *      This is the same type of numeric event as
@@ -494,26 +497,24 @@ implements  Erebot_Interface_HelpEnabled
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleNames(
-        Erebot_Interface_NumericHandler $handler,
-        Erebot_Interface_Event_Numeric  $numeric
-    )
-    {
+        \Erebot\Interfaces\NumericHandler   $handler,
+        \Erebot\Interfaces\Event\Numeric    $numeric
+    ) {
         $text   = $numeric->getText();
         $chan   = $text[1];
-        $users  = new Erebot_TextWrapper(
+        $users  = new \Erebot\TextWrapper(
             ltrim($numeric->getText()->getTokens(2), ':')
         );
 
         try {
-            $caps = $this->_connection->getModule(
-                'Erebot_Module_ServerCapabilities'
+            $caps = $this->connection->getModule(
+                '\\Erebot\\Module\\ServerCapabilities'
             );
-        }
-        catch (Erebot_NotFoundException $e) {
+        } catch (\Erebot\NotFoundException $e) {
             return;
         }
 
-        if (!$this->_hasUHNAMES) {
+        if (!$this->hasUHNAMES) {
             $this->sendCommand('WHO '.$chan);
         }
 
@@ -522,93 +523,91 @@ implements  Erebot_Interface_HelpEnabled
             for ($i = 0, $len = strlen($user); $i < $len; $i++) {
                 try {
                     $modes[] = $caps->getChanModeForPrefix($user[$i]);
-                }
-                catch (Erebot_NotFoundException $e) {
+                } catch (\Erebot\NotFoundException $e) {
                     break;
                 }
             }
 
             $user = substr($user, count($modes));
-            if ($user === FALSE)
+            if ($user === false) {
                 continue;
+            }
 
             $identityCls = $this->getFactory('!Identity');
             $identity   = new $identityCls($user);
             $nick       = $identity->getNick();
-            $collator   = $this->_connection->getCollator();
+            $collator   = $this->connection->getCollator();
             $normNick   = $collator->normalizeNick($nick);
 
-            $this->_updateUser(
+            $this->updateUser(
                 $nick,
                 $identity->getIdent(),
-                $identity->getHost(Erebot_Interface_Identity::CANON_IPV6)
+                $identity->getHost(\Erebot\Interfaces\Identity::CANON_IPV6)
             );
-            $key = array_search($normNick, $this->_nicks);
-            $this->_chans[$chan][$key] = $modes;
+            $key = array_search($normNick, $this->nicks);
+            $this->chans[$chan][$key] = $modes;
         }
     }
 
     /**
      * Handles information about some user.
      *
-     * \param Erebot_Interface_NumericHandler $handler
+     * \param Erebot::Interfaces::NumericHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Numeric $numeric
+     * \param Erebot::Interfaces::Event::Numeric $numeric
      *      Numeric event containing some user's nickname,
      *      IRC identity and hostname.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleWho(
-        Erebot_Interface_NumericHandler $handler,
-        Erebot_Interface_Event_Numeric  $numeric
-    )
-    {
+        \Erebot\Interfaces\NumericHandler   $handler,
+        \Erebot\Interfaces\Event\Numeric    $numeric
+    ) {
         $text = $numeric->getText();
-        $this->_updateUser($text[4], $text[1], $text[2]);
+        $this->updateUser($text[4], $text[1], $text[2]);
     }
 
     /**
      * Handles some user joining an IRC channel
      * the bot is currently on.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Join $event
+     * \param Erebot::Interfaces::Event::Join $event
      *      Event indicating that some user joined
      *      a channel the bot is on.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleJoin(
-        Erebot_Interface_EventHandler   $handler,
-        Erebot_Interface_Event_Join     $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler $handler,
+        \Erebot\Interfaces\Event\Join   $event
+    ) {
         $user       = $event->getSource();
         $nick       = $user->getNick();
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
 
-        $this->_updateUser(
+        $this->updateUser(
             $nick,
             $user->getIdent(),
-            $user->getHost(Erebot_Interface_Identity::CANON_IPV6)
+            $user->getHost(\Erebot\Interfaces\Identity::CANON_IPV6)
         );
-        $key = array_search($normNick, $this->_nicks);
-        $this->_chans[$event->getChan()][$key] = array();
+        $key = array_search($normNick, $this->nicks);
+        $this->chans[$event->getChan()][$key] = array();
     }
 
     /**
      * Handles someone receiving a new status on an IRC channel,
      * for example, when someone is OPped.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Base_ChanModeGiven $event
+     * \param Erebot::Interfaces::Event::Base::ChanModeGiven $event
      *      Event indicating someone's status changed
      *      on an IRC channel the bot is currently on,
      *      giving that person new privileges.
@@ -616,30 +615,30 @@ implements  Erebot_Interface_HelpEnabled
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleChanModeAddition(
-        Erebot_Interface_EventHandler               $handler,
-        Erebot_Interface_Event_Base_ChanModeGiven   $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler             $handler,
+        \Erebot\Interfaces\Event\Base\ChanModeGiven $event
+    ) {
         $user       = $event->getTarget();
         $nick       = self::extractNick($user);
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
-        $key        = array_search($normNick, $this->_nicks);
-        if ($key === FALSE)
+        $key        = array_search($normNick, $this->nicks);
+        if ($key === false) {
             return;
+        }
 
-        $this->_chans[$event->getChan()][$key][] =
-            Erebot_Utils::getVStatic($event, 'MODE_LETTER');
+        $this->chans[$event->getChan()][$key][] =
+            \Erebot\Utils::getVStatic($event, 'MODE_LETTER');
     }
 
     /**
      * Handles someone losing his status on an IRC channel,
      * for example, when someone is DEOPped.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Base_ChanModeTaken $event
+     * \param Erebot::Interfaces::Event::Base::ChanModeTaken $event
      *      Event indicating someone's status changed
      *      on an IRC channel the bot is currently on,
      *      removing privileges from that person.
@@ -647,26 +646,27 @@ implements  Erebot_Interface_HelpEnabled
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleChanModeRemoval(
-        Erebot_Interface_EventHandler               $handler,
-        Erebot_Interface_Event_Base_ChanModeTaken   $event
-    )
-    {
+        \Erebot\Interfaces\EventHandler             $handler,
+        \Erebot\Interfaces\Event\Base\ChanModeTaken $event
+    ) {
         $user       = $event->getTarget();
         $nick       = self::extractNick($user);
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $normNick   = $collator->normalizeNick($nick);
-        $key        = array_search($normNick, $this->_nicks);
-        if ($key === FALSE)
+        $key        = array_search($normNick, $this->nicks);
+        if ($key === false) {
             return;
+        }
 
         $modeIndex = array_search(
-            Erebot_Utils::getVStatic($event, 'MODE_LETTER'),
-            $this->_chans[$event->getChan()][$key]
+            \Erebot\Utils::getVStatic($event, 'MODE_LETTER'),
+            $this->chans[$event->getChan()][$key]
         );
-        if ($modeIndex === FALSE)
+        if ($modeIndex === false) {
             return;
+        }
 
-        unset($this->_chans[$event->getChan()][$key][$modeIndex]);
+        unset($this->chans[$event->getChan()][$key][$modeIndex]);
     }
 
     /**
@@ -677,7 +677,7 @@ implements  Erebot_Interface_HelpEnabled
      *
      * \param string $cls
      *      (optional) Class to use to create the token.
-     *      Defaults to Erebot_Module_IrcTracker_Token.
+     *      Defaults to Erebot::Module::IrcTracker::Token.
      *
      * \retval mixed
      *      A token that can later be used to return information
@@ -685,34 +685,35 @@ implements  Erebot_Interface_HelpEnabled
      *      hostname and whether that person is still online or
      *      not).
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      There is currently no user connected on an IRC channel
      *      the bot is on matching the given nickname.
+     *
+     * \throw Erebot::InvalidValueException
+     *      The given nick is invalid.
      */
-    public function startTracking(
-        $nick,
-        $cls    = 'Erebot_Module_IrcTracker_Token'
-    )
+    public function startTracking($nick, $cls = '\\Erebot\\Module\\IrcTracker\\Token')
     {
         $identityCls = $this->getFactory('!Identity');
-        $fmt = $this->getFormatter(NULL);
-        if ($nick instanceof $identityCls)
+        $fmt = $this->getFormatter(null);
+        if ($nick instanceof $identityCls) {
             $identity = $nick;
-        else {
+        } else {
             if (!is_string($nick)) {
-                throw new Erebot_InvalidValueException(
+                throw new \Erebot\InvalidValueException(
                     $fmt->_('Not a valid nick')
                 );
             }
             $identity = new $identityCls($nick);
         }
 
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $nick       = $collator->normalizeNick($identity->getNick());
-        $key        = array_search($nick, $this->_nicks);
+        $key        = array_search($nick, $this->nicks);
 
-        if ($key === FALSE)
-            throw new Erebot_NotFoundException($fmt->_('No such user'));
+        if ($key === false) {
+            throw new \Erebot\NotFoundException($fmt->_('No such user'));
+        }
         return new $cls($this, $key);
     }
 
@@ -732,34 +733,34 @@ implements  Erebot_Interface_HelpEnabled
      *      (optional) Additional arguments for the query.
      *      Defaults to an empty array. At present time,
      *      this argument is only useful when you pass
-     *      one of Erebot_Module_IrcTracker::INFO_HOST or
-     *      Erebot_Module_IrcTracker::INFO_MASK as the
+     *      one of Erebot::Module::IrcTracker::INFO_HOST or
+     *      Erebot::Module::IrcTracker::INFO_MASK as the
      *      value for $info. In this case, you may pass an
      *      array containing a boolean ($canonical) indicating
      *      the type of hostname canonicalization to apply.
-     *      See also Erebot_Interface_Identity::getHost()
+     *      See also Erebot::Interfaces::Identity::getHost()
      *      for more information on the $canonical parameter.
      *
      * \retval mixed
      *      Requested information about that user.
-     *      This may be NULL if the requested information
+     *      This may be \b null if the requested information
      *      has not been obtained yet.
      *
-     * \throw Erebot_InvalidValueException
+     * \throw Erebot::InvalidValueException
      *      The value for $info is invalid.
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      The given $token does not match any known user.
      *
      * \warning
      *      This method is not meant to be called directly.
      *      Instead, you should call the equivalent methods
      *      (getNick(), getHost(), etc.) from the token
-     *      returned by Erebot_Module_IrcTracker::startTracking().
+     *      returned by Erebot::Module::IrcTracker::startTracking().
      */
     public function getInfo($token, $info, $args = array())
     {
-        if ($token instanceof Erebot_Module_IrcTracker_Token) {
+        if ($token instanceof \Erebot\Module\IrcTracker\Token) {
             $methods = array(
                 self::INFO_ISON     => 'isOn',
                 self::INFO_MASK     => 'getMask',
@@ -767,44 +768,47 @@ implements  Erebot_Interface_HelpEnabled
                 self::INFO_IDENT    => 'getIdent',
                 self::INFO_HOST     => 'getHost',
             );
-            if (!isset($methods[$info]))
-                throw new Erebot_InvalidValueException('No such information');
+            if (!isset($methods[$info])) {
+                throw new \Erebot\InvalidValueException('No such information');
+            }
             array_unshift($args, $token, $methods[$info]);
             return call_user_func($args);
         }
 
-        $fmt = $this->getFormatter(NULL);
+        $fmt = $this->getFormatter(null);
         if (is_string($token)) {
-            $collator   = $this->_connection->getCollator();
+            $collator   = $this->connection->getCollator();
             $token      = $collator->normalizeNick(
                 self::extractNick($token)
             );
-            $token = array_search($token, $this->_nicks);
-            if ($token === FALSE) {
-                throw new Erebot_NotFoundException(
+            $token = array_search($token, $this->nicks);
+            if ($token === false) {
+                throw new \Erebot\NotFoundException(
                     $fmt->_('No such user')
                 );
             }
         }
 
-        if (!isset($this->_ial[$token]))
-            throw new Erebot_NotFoundException($fmt->_('No such token'));
+        if (!isset($this->ial[$token])) {
+            throw new \Erebot\NotFoundException($fmt->_('No such token'));
+        }
 
         $info = strtolower($info);
         if ($info == 'mask') {
-            if ($this->_ial[$token]['ident'] === NULL)
-                return $this->_ial[$token]['nick'].'!*@*';
-            return  $this->_ial[$token]['nick'].'!'.
-                    $this->_ial[$token]['ident'].'@'.
-                    $this->_ial[$token]['host'];
+            if ($this->ial[$token]['ident'] === null) {
+                return $this->ial[$token]['nick'].'!*@*';
+            }
+            return  $this->ial[$token]['nick'].'!'.
+                    $this->ial[$token]['ident'].'@'.
+                    $this->ial[$token]['host'];
         }
 
-        if (!array_key_exists($info, $this->_ial[$token])) {
-            throw new Erebot_InvalidValueException(
+        if (!array_key_exists($info, $this->ial[$token])) {
+            throw new \Erebot\InvalidValueException(
                 $fmt->_('No such information')
             );
         }
-        return $this->_ial[$token][$info];
+        return $this->ial[$token][$info];
     }
 
     /**
@@ -816,27 +820,29 @@ implements  Erebot_Interface_HelpEnabled
      *
      * \param mixed $nick
      *      (optional) Either some user's nickname
-     *      (a string) or NULL. Defaults to NULL.
-     *      When this parameter is NULL, this method
+     *      (a string) or \b null. Defaults to \b null.
+     *      When this parameter is \b null, this method
      *      tests whether the bot is on the given
      *      IRC channel or not.
      *
      * \retval bool
-     *      TRUE is the given user is on that
-     *      IRC channel, FALSE otherwise.
+     *      \b true is the given user is on that
+     *      IRC channel, \b false otherwise.
      */
-    public function isOn($chan, $nick = NULL)
+    public function isOn($chan, $nick = null)
     {
-        if ($nick === NULL)
-            return isset($this->_chans[$chan]);
+        if ($nick === null) {
+            return isset($this->chans[$chan]);
+        }
 
         $nick       = self::extractNick($nick);
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $nick       = $collator->normalizeNick($nick);
-        $key        = array_search($nick, $this->_nicks);
-        if ($key === FALSE)
-            return FALSE;
-        return isset($this->_chans[$chan][$key]);
+        $key        = array_search($nick, $this->nicks);
+        if ($key === false) {
+            return false;
+        }
+        return isset($this->chans[$chan][$key]);
     }
 
     /**
@@ -851,22 +857,24 @@ implements  Erebot_Interface_HelpEnabled
      *      A list with the names of all IRC channels
      *      that user and the bot have in common.
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      The given nickname does not match any known user.
      */
     public function getCommonChans($nick)
     {
         $nick       = self::extractNick($nick);
-        $collator   = $this->_connection->getCollator();
+        $collator   = $this->connection->getCollator();
         $nick       = $collator->normalizeNick($nick);
-        $key        = array_search($nick, $this->_nicks);
-        if ($key === FALSE)
-            throw new Erebot_NotFoundException('No such user');
+        $key        = array_search($nick, $this->nicks);
+        if ($key === false) {
+            throw new \Erebot\NotFoundException('No such user');
+        }
 
         $results = array();
-        foreach ($this->_chans as $chan => $users) {
-            if (isset($users[$key]))
+        foreach ($this->chans as $chan => $users) {
+            if (isset($users[$key])) {
                 $results[] = $chan;
+            }
         }
         return $results;
     }
@@ -885,27 +893,28 @@ implements  Erebot_Interface_HelpEnabled
      *      (optional) Only search for users that
      *      have joined this IRC channel (given
      *      by its name, as a string).
-     *      May also be set to NULL to search for
+     *      May also be set to \b null to search for
      *      all users known to the bot, no matter
      *      what channels they are currently on.
-     *      Defaults to NULL.
+     *      Defaults to \b null.
      *
      * \retval list
      *      A list with the masks of all users
      *      matching the given criteria.
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      The given channel name does not match
      *      the name of any channel the bot is on.
      */
-    public function IAL($mask, $chan = NULL)
+    public function IAL($mask, $chan = null)
     {
         $results = array();
 
-        if (strpos($mask, '!') === FALSE)
+        if (strpos($mask, '!') === false) {
             $mask .= '!*@*';
-        else if (strpos($mask, '@') === FALSE)
+        } elseif (strpos($mask, '@') === false) {
             $mask .= '@*';
+        }
 
         $translationTable = array(
             '\\*'   => '.*',
@@ -913,26 +922,29 @@ implements  Erebot_Interface_HelpEnabled
         );
         $pattern = "#^".strtr(preg_quote($mask, '#'), $translationTable)."$#";
 
-        if ($chan !== NULL) {
-            if (!isset($this->_chans[$chan]))
-                throw new Erebot_NotFoundException(
+        if ($chan !== null) {
+            if (!isset($this->chans[$chan])) {
+                throw new \Erebot\NotFoundException(
                     'The bot is not on that channel!'
                 );
+            }
 
             // Search only matching users on that channel.
-            foreach (array_keys($this->_chans[$chan]) as $key) {
-                $entry  = $this->_ial[$key];
+            foreach (array_keys($this->chans[$chan]) as $key) {
+                $entry  = $this->ial[$key];
                 $full   = $entry['nick'].'!'.$entry['ident'].'@'.$entry['host'];
-                if (preg_match($pattern, $full) == 1)
+                if (preg_match($pattern, $full) == 1) {
                     $results[] = $full;
+                }
             }
             return $results;
         }
 
-        foreach ($this->_ial as $entry) {
+        foreach ($this->ial as $entry) {
             $full = $entry['nick'].'!'.$entry['ident'].'@'.$entry['host'];
-            if (preg_match($pattern, $full) == 1)
+            if (preg_match($pattern, $full) == 1) {
                 $results[] = $full;
+            }
         }
         return $results;
     }
@@ -955,15 +967,16 @@ implements  Erebot_Interface_HelpEnabled
      *      for the channel mode that refers to
      *      it (eg. "o" for "operator status").
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      The given channel or nickname is not
      *      not known to the bot.
      */
     public function userPrivileges($chan, $nick)
     {
-        if (!isset($this->_chans[$chan][$nick]))
-            throw new Erebot_NotFoundException('No such channel or user');
-        return $this->_chans[$chan][$nick];
+        if (!isset($this->chans[$chan][$nick])) {
+            throw new \Erebot\NotFoundException('No such channel or user');
+        }
+        return $this->chans[$chan][$nick];
     }
 
     /**
@@ -987,30 +1000,32 @@ implements  Erebot_Interface_HelpEnabled
      *      Nicknames of all users matching the given
      *      criteria.
      *
-     * \throw Erebot_NotFoundException
+     * \throw Erebot::NotFoundException
      *      The bot is not present on the given IRC
      *      channel and so the search cannot succeed.
      */
-    public function byChannelModes($chan, $modes, $negate = FALSE)
+    public function byChannelModes($chan, $modes, $negate = false)
     {
-        if (!isset($this->_chans[$chan]))
-            throw new Erebot_NotFoundException('No such channel');
-        if (!is_array($modes))
+        if (!isset($this->chans[$chan])) {
+            throw new \Erebot\NotFoundException('No such channel');
+        }
+        if (!is_array($modes)) {
             $modes = array($modes);
+        }
 
         $results = array();
         $nbModes = count($modes);
-        foreach ($this->_chans[$chan] as $key => $chmodes) {
+        foreach ($this->chans[$chan] as $key => $chmodes) {
             if ($nbModes) {
                 $commonCount = count(array_intersect($modes, $chmodes));
-                if (($commonCount == $nbModes && $negate === FALSE) ||
-                    ($commonCount == 0 && $negate === TRUE))
-                    $results[] = $this->_nicks[$key];
+                if (($commonCount == $nbModes && $negate === false) ||
+                    ($commonCount == 0 && $negate === true)) {
+                    $results[] = $this->nicks[$key];
+                }
+            } elseif (((bool) count($chmodes)) == $negate) {
+                $results[] = $this->nicks[$key];
             }
-            else if (((bool) count($chmodes)) == $negate)
-                $results[] = $this->_nicks[$key];
         }
         return $results;
     }
 }
-
