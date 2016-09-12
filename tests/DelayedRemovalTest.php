@@ -30,15 +30,8 @@ extends Erebot_Testenv_Module_TestCase
 {
     protected function _mockJoin($nick, $ident, $host)
     {
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Join',
-            array(), array(), '', FALSE, FALSE
-        );
-
-        $identity = $this->getMock(
-            '\\Erebot\\Interfaces\\Identity',
-            array(), array(), '', FALSE, FALSE
-        );
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Join')->getMock();
+        $identity = $this->getMockBuilder('\\Erebot\\Interfaces\\Identity')->getMock();
         $identity
             ->expects($this->any())
             ->method('getNick')
@@ -72,10 +65,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->_module = new \Erebot\Module\IrcTracker(NULL);
         parent::setUp();
 
-        $timer = $this->getMock(
-            '\\Erebot\\TimerInterface',
-            array(), array(), '', FALSE, FALSE
-        );
+        $timer = $this->getMockBuilder('\\Erebot\\TimerInterface')->getMock();
         $this->_module->setFactory('!Timer', get_class($timer));
 
         $this->_serverConfig
@@ -97,10 +87,7 @@ extends Erebot_Testenv_Module_TestCase
         $this->_token = $this->_module->startTracking('foo', 'TestToken');
         $this->assertEquals("foo", (string) $this->_token);
 
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Quit',
-            array(), array(), '', FALSE, FALSE
-        );
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Quit')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -126,10 +113,7 @@ extends Erebot_Testenv_Module_TestCase
     public function testDelayedRemoval()
     {
         // Simulate the timer going off.
-        $timer = $this->getMock(
-            '\\Erebot\\TimerInterface',
-            array(), array(), '', FALSE, FALSE
-        );
+        $timer = $this->getMockBuilder('\\Erebot\\TimerInterface')->getMock();
         $this->_module->removeUser($timer, 'foo');
 
         // "foo" should have been wiped out.
@@ -169,11 +153,7 @@ extends Erebot_Testenv_Module_TestCase
 
         // Attacker tries to hijack foo's identity
         // by changing his nick into "foo".
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Nick',
-            array(), array(), '', FALSE, FALSE
-        );
-
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Nick')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')

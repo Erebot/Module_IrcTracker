@@ -21,11 +21,7 @@ extends Erebot_Testenv_Module_TestCase
 {
     protected function _mockNick($oldnick, $newnick)
     {
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Nick',
-            array(), array(), '', FALSE, FALSE
-        );
-
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Nick')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -56,10 +52,7 @@ extends Erebot_Testenv_Module_TestCase
             \Erebot\Module\Base::RELOAD_MEMBERS
         );
 
-        $identity = $this->getMock(
-            '\\Erebot\\Interfaces\\Identity',
-            array(), array(), '', FALSE, FALSE
-        );
+        $identity = $this->getMockBuilder('\\Erebot\\Interfaces\\Identity')->getMock();
         $identity
             ->expects($this->any())
             ->method('getNick')
@@ -73,10 +66,7 @@ extends Erebot_Testenv_Module_TestCase
             ->method('getHost')
             ->will($this->returnValue('host'));
 
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Join',
-            array(), array(), '', FALSE, FALSE
-        );
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Join')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -142,11 +132,7 @@ extends Erebot_Testenv_Module_TestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Kick',
-            array(), array(), '', FALSE, FALSE
-        );
-
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Kick')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -169,11 +155,7 @@ extends Erebot_Testenv_Module_TestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Part',
-            array(), array(), '', FALSE, FALSE
-        );
-
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Part')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -196,11 +178,7 @@ extends Erebot_Testenv_Module_TestCase
         $token = $this->_module->startTracking('foo');
         $this->assertEquals("foo", (string) $token);
 
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Quit',
-            array(), array(), '', FALSE, FALSE
-        );
-
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Quit')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
@@ -230,10 +208,7 @@ extends Erebot_Testenv_Module_TestCase
             if ($cls === FALSE)
                 continue;
 
-            $identity = $this->getMock(
-                '\\Erebot\\Interfaces\\Identity',
-                array(), array(), '', FALSE, FALSE
-            );
+            $identity = $this->getMockBuilder('\\Erebot\\Interfaces\\Identity')->getMock();
             $identity
                 ->expects($this->any())
                 ->method('getNick')
@@ -247,10 +222,7 @@ extends Erebot_Testenv_Module_TestCase
                 ->method('getHost')
                 ->will($this->returnValue('host'));
 
-            $event = $this->getMock(
-                '\\Erebot\\Interfaces\\Event\\Join',
-                array(), array(), '', FALSE, FALSE
-            );
+            $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Join')->getMock();
             $event
                 ->expects($this->any())
                 ->method('getConnection')
@@ -266,10 +238,7 @@ extends Erebot_Testenv_Module_TestCase
 
             $this->_module->handleJoin($this->_eventHandler, $event);
 
-            $event = $this->getMock(
-                $cls,
-                array(), array(), '', FALSE, FALSE
-            );
+            $event = $this->getMockBuilder($cls)->getMock();
             $event
                 ->expects($this->any())
                 ->method('getConnection')
@@ -312,10 +281,7 @@ extends Erebot_Testenv_Module_TestCase
         }
 
         // Protect "q".
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\Protect',
-            array(), array(), '', FALSE, FALSE
-        );
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\Protect')->getMock();
         $event
             ->expects($this->any())
             ->method('getConnection')
