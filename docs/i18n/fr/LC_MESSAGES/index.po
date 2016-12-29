@@ -1,0 +1,38 @@
+# French translations for Erebot_Module_IrcTracker package.
+# Copyright (C) 2011-2016, Erebot
+# This file is distributed under the same license as the Erebot_Module_IrcTracker package.
+# Automatically generated, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot_Module_IrcTracker 1.0.x-dev\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-29 23:03+0100\n"
+"PO-Revision-Date: 2016-12-29 23:03+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#
+msgid "Welcome to the documentation for Erebot_Module_IrcTracker!"
+msgstr ""
+#
+msgid ""
+"Erebot_Module_IrcTracker is a module for `Erebot`_ that keeps track of users: "
+"what users are currently present on the same channels as the bot, what is "
+"their status on those channels, etc."
+msgstr ""
+#
+msgid ""
+"This module can keep track of users across short disconnections using a set "
+"of timers and a smart algorithm that can detect nickname takeover attempts."
+msgstr ""
+#
+msgid "Contents:"
+msgstr ""
+#
+msgid "Current status on http://travis-ci.org/: |travis|"
+msgstr ""

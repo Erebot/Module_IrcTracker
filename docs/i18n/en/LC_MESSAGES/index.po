@@ -1,0 +1,48 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2016, Erebot
+# This file is distributed under the same license as the Erebot_Module_IrcTracker package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot_Module_IrcTracker 1.0.x-dev\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-29 23:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+#
+# File: ../src/index.rst, line: 10
+msgid "Welcome to the documentation for Erebot_Module_IrcTracker!"
+msgstr "Welcome to the documentation for Erebot_Module_IrcTracker!"
+#
+# File: ../src/index.rst, line: 12
+msgid ""
+"Erebot_Module_IrcTracker is a module for `Erebot`_ that keeps track of users: "
+"what users are currently present on the same channels as the bot, what is "
+"their status on those channels, etc."
+msgstr ""
+"Erebot_Module_IrcTracker is a module for `Erebot`_ that keeps track of users: "
+"what users are currently present on the same channels as the bot, what is "
+"their status on those channels, etc."
+#
+# File: ../src/index.rst, line: 16
+msgid ""
+"This module can keep track of users across short disconnections using a set "
+"of timers and a smart algorithm that can detect nickname takeover attempts."
+msgstr ""
+"This module can keep track of users across short disconnections using a set "
+"of timers and a smart algorithm that can detect nickname takeover attempts."
+#
+# File: ../src/index.rst, line: 19
+msgid "Contents:"
+msgstr "Contents:"
+#
+# File: ../src/index.rst, line: 31
+msgid "Current status on http://travis-ci.org/: |travis|"
+msgstr "Current status on http://travis-ci.org/: |travis|"

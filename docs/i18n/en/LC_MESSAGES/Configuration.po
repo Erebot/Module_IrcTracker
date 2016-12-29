@@ -1,0 +1,44 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2016, Erebot
+# This file is distributed under the same license as the Erebot_Module_IrcTracker package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot_Module_IrcTracker 1.0.x-dev\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-29 23:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+#
+# File: ../src/Configuration.rst, line: 10
+msgid "Configuration"
+msgstr "Configuration"
+#
+# File: ../src/Configuration.rst, line: 13
+msgid "Options"
+msgstr "Options"
+#
+# File: ../src/Configuration.rst, line: 15
+msgid "This module offers no configuration options."
+msgstr "This module offers no configuration options."
+#
+# File: ../src/Configuration.rst, line: 19
+msgid "Example"
+msgstr "Example"
+#
+# File: ../src/Configuration.rst, line: 21
+msgid ""
+"In this example, we make this module available to any network/channel so that "
+"other modules can rely on it. This is the recommended way of using this "
+"module."
+msgstr ""
+"In this example, we make this module available to any network/channel so that "
+"other modules can rely on it. This is the recommended way of using this "
+"module."
