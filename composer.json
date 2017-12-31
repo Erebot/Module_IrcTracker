@@ -23,8 +23,7 @@
     },
     "require-dev": {
         "erebot/buildenv": "^1.4.0",
-        "erebot/testenv": "^1.1.2",
-        "erebot/generic-doc": "*"
+        "erebot/testenv": "^1.1.2"
     },
     "autoload": {
         "psr-4": {
