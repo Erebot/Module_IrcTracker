@@ -88,21 +88,21 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
         if ($flags & self::RELOAD_HANDLERS) {
             // Handles some user changing his nickname.
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleNick')),
+                array($this, 'handleNick'),
                 new \Erebot\Event\Match\Type('\\Erebot\\Interfaces\\Event\\Nick')
             );
             $this->connection->addEventHandler($handler);
 
             // Handles some user joining a channel the bot is on.
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleJoin')),
+                array($this, 'handleJoin'),
                 new \Erebot\Event\Match\Type('\\Erebot\\Interfaces\\Event\\Join')
             );
             $this->connection->addEventHandler($handler);
 
             // Handles some user leaving a channel (for various reasons).
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleLeaving')),
+                array($this, 'handleLeaving'),
                 new \Erebot\Event\Match\Any(
                     new \Erebot\Event\Match\Type(
                         '\\Erebot\\Interfaces\\Event\\Quit'
@@ -119,7 +119,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
 
             // Handles possible extensions.
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleCapabilities')),
+                array($this, 'handleCapabilities'),
                 new \Erebot\Event\Match\Type(
                     '\\Erebot\\Event\\ServerCapabilities'
                 )
@@ -128,20 +128,20 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
 
             // Handles information received when the bot joins a channel.
             $numeric = new \Erebot\NumericHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleNames')),
+                array($this, 'handleNames'),
                 $this->getNumRef('RPL_NAMEREPLY')
             );
             $this->connection->addNumericHandler($numeric);
 
             $numeric = new \Erebot\NumericHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleWho')),
+                array($this, 'handleWho'),
                 $this->getNumRef('RPL_WHOREPLY')
             );
             $this->connection->addNumericHandler($numeric);
 
             // Handles modes given/taken to/from users on IRC channels.
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleChanModeAddition')),
+                array($this, 'handleChanModeAddition'),
                 new \Erebot\Event\Match\Type(
                     '\\Erebot\\Interfaces\\Event\\Base\\ChanModeGiven'
                 )
@@ -149,7 +149,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
             $this->connection->addEventHandler($handler);
 
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleChanModeRemoval')),
+                array($this, 'handleChanModeRemoval'),
                 new \Erebot\Event\Match\Type(
                     '\\Erebot\\Interfaces\\Event\\Base\\ChanModeTaken'
                 )
@@ -158,7 +158,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
 
             // Handles users on the WATCH list (see also the WatchList module).
             $handler = new \Erebot\EventHandler(
-                \Erebot\CallableWrapper::wrap(array($this, 'handleNotification')),
+                array($this, 'handleNotification'),
                 new \Erebot\Event\Match\Type(
                     '\\Erebot\\Event\\NotificationAbstract'
                 )
@@ -444,7 +444,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
             } else {
                 $timerCls       = $this->getFactory('!Timer');
                 $timer = new $timerCls(
-                    \Erebot\CallableWrapper::wrap(array($this, 'removeUser')),
+                    array($this, 'removeUser'),
                     $delay,
                     false,
                     array($nick)
