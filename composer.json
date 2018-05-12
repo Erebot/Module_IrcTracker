@@ -19,11 +19,11 @@
     },
     "require": {
         "php": ">=7.0",
-        "erebot/api": "^0.7.1"
+        "erebot/api": "^0.9.0"
     },
     "require-dev": {
-        "erebot/buildenv": "^1.4.0",
-        "erebot/testenv": "^1.1.2"
+        "erebot/buildenv": "^1.5.0",
+        "erebot/testenv": "^2.0.0"
     },
     "autoload": {
         "psr-4": {
