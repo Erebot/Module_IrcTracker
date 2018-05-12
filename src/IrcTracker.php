@@ -696,7 +696,7 @@ class IrcTracker extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpE
     {
         $identityCls = $this->getFactory('!Identity');
         $fmt = $this->getFormatter(null);
-        if ($nick instanceof $identityCls) {
+        if ($nick instanceof \Erebot\Interfaces\Identity) {
             $identity = $nick;
         } else {
             if (!is_string($nick)) {
